@@ -379,4 +379,30 @@ router.get('/:testId/questions/:questionId', [
   }
 });
 
+// Clear cache endpoint (for development/admin use)
+router.post('/:testId/clear-cache', testIdValidation, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: errors.array()
+      });
+    }
+
+    // This endpoint just returns success - actual cache clearing happens on client
+    res.json({
+      success: true,
+      message: 'Cache clear signal sent',
+      testId: req.params.testId
+    });
+
+  } catch (error) {
+    console.error('Clear cache error:', error);
+    res.status(500).json({
+      error: 'Internal server error'
+    });
+  }
+});
+
 module.exports = router;

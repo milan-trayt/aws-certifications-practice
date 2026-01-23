@@ -62,9 +62,9 @@
       "category": "AWS",
       "difficulty": "Cloud Practitioner",
       "filename": "aws-clf-c02.json",
-      "totalQuestions": 608,
+      "totalQuestions": 718,
       "timeLimit": 90,
-      "passingScore": 718
+      "passingScore": 70
     }
   ]
 }
