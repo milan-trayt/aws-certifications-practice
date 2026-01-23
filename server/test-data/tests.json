@@ -43,6 +43,17 @@
       "totalQuestions": 529,
       "timeLimit": 120,
       "passingScore": 75
+    },
+    {
+      "id": "aws-aif-c01",
+      "name": "AWS Certified AI Practitioner (AIF-C01)",
+      "description": "AWS Certified AI Practitioner - Exam practice questions",
+      "category": "AWS",
+      "difficulty": "Associate",
+      "filename": "aws-aif-c01.json",
+      "totalQuestions": 233,
+      "timeLimit": 90,
+      "passingScore": 70
     }
   ]
 }
