@@ -54,6 +54,17 @@
       "totalQuestions": 233,
       "timeLimit": 90,
       "passingScore": 70
+    },
+    {
+      "id": "aws-clf-c02",
+      "name": "AWS Certified Cloud Practitioner (CLF-C02)",
+      "description": "AWS Certified Cloud Practitioner exam practice questions",
+      "category": "AWS",
+      "difficulty": "Cloud Practitioner",
+      "filename": "aws-clf-c02.json",
+      "totalQuestions": 608,
+      "timeLimit": 90,
+      "passingScore": 718
     }
   ]
 }
