@@ -61,7 +61,7 @@
       "description": "AWS Certified Cloud Practitioner - Exam practice questions",
       "category": "AWS",
       "difficulty": "Foundational",
-      "filename": "aws-aif-c01.json",
+      "filename": "aws-clf-c02.json",
       "totalQuestions": 718,
       "timeLimit": 90,
       "passingScore": 70
