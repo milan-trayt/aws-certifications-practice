@@ -49,9 +49,20 @@
       "name": "AWS Certified AI Practitioner (AIF-C01)",
       "description": "AWS Certified AI Practitioner - Exam practice questions",
       "category": "AWS",
-      "difficulty": "Associate",
+      "difficulty": "Foundational",
       "filename": "aws-aif-c01.json",
       "totalQuestions": 233,
+      "timeLimit": 90,
+      "passingScore": 70
+    },
+    {
+      "id": "aws-clf-c02",
+      "name": "AWS Certified Cloud Practitioner (CLF-C02)",
+      "description": "AWS Certified Cloud Practitioner - Exam practice questions",
+      "category": "AWS",
+      "difficulty": "Foundational",
+      "filename": "aws-aif-c01.json",
+      "totalQuestions": 718,
       "timeLimit": 90,
       "passingScore": 70
     }
