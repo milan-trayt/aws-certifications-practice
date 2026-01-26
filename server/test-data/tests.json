@@ -65,6 +65,17 @@
       "totalQuestions": 718,
       "timeLimit": 90,
       "passingScore": 70
+    },
+    {
+      "id": "aws-mla-c01",
+      "name": "AWS Certified Machine Learning Engineer  (MLA-C01)",
+      "description": "AWS Certified Machine Learning Engineer exam practice questions",
+      "category": "AWS",
+      "difficulty": "Associate",
+      "filename": "aws-mla-c01.json",
+      "totalQuestions": 113,
+      "timeLimit": 90,
+      "passingScore": 70
     }
   ]
 }
