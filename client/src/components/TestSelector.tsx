@@ -1,5 +1,6 @@
 import React from 'react';
 import { TestMetadata } from '../types';
+import { BookOpen } from 'lucide-react';
 import './TestSelector.css';
 
 interface TestSelectorProps {
@@ -19,7 +20,7 @@ const TestSelector: React.FC<TestSelectorProps> = ({
     return (
       <div className="test-selector">
         <div className="test-selector-header">
-          <h2>📚 Select Practice Test</h2>
+          <h2><BookOpen size={20} style={{verticalAlign: 'middle', marginRight: 4}} /> Select Practice Test</h2>
           <p>Loading available tests...</p>
         </div>
         <div className="loading-tests">
@@ -33,7 +34,7 @@ const TestSelector: React.FC<TestSelectorProps> = ({
   return (
     <div className="test-selector">
       <div className="test-selector-header">
-        <h2>📚 Select Practice Test</h2>
+        <h2><BookOpen size={20} style={{verticalAlign: 'middle', marginRight: 4}} /> Select Practice Test</h2>
         <p>Choose from available certification practice tests</p>
       </div>
       
@@ -43,6 +44,9 @@ const TestSelector: React.FC<TestSelectorProps> = ({
             key={test.id}
             className={`test-card ${selectedTest?.id === test.id ? 'selected' : ''}`}
             onClick={() => onTestSelect(test)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTestSelect(test); } }}
           >
             <div className="test-card-header">
               <h3>{test.name}</h3>
@@ -62,7 +66,7 @@ const TestSelector: React.FC<TestSelectorProps> = ({
               </div>
               <div className="test-stat">
                 <span className="stat-label">Passing Score:</span>
-                <span className="stat-value">{test.passingScore}%</span>
+                <span className="stat-value">{test.passingScore}/1000</span>
               </div>
               <div className="test-stat">
                 <span className="stat-label">Difficulty:</span>

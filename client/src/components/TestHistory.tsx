@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { progressService } from '../services/progressService';
+import { useAuth } from '../contexts/AuthContext';
 import MockTestReview from './MockTestReview';
+import PDFExportButton from './PDFExportButton';
+import { CheckCircle, XCircle } from 'lucide-react';
 import './TestHistory.css';
 
 interface TestHistoryProps {
@@ -19,9 +22,11 @@ interface MockTestResult {
   passingScore: number;
   passed: boolean;
   percentage: number;
+  scaledScore: number;
 }
 
 const TestHistory: React.FC<TestHistoryProps> = ({ testName, testId }) => {
+  const { user } = useAuth();
   const [mockTestHistory, setMockTestHistory] = useState<MockTestResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -77,6 +82,14 @@ const TestHistory: React.FC<TestHistoryProps> = ({ testName, testId }) => {
     });
   };
 
+  const historyStats = useMemo(() => ({
+    totalTests: mockTestHistory.length,
+    averageScore: mockTestHistory.length > 0
+      ? Math.round(mockTestHistory.reduce((sum, test) => sum + test.percentage, 0) / mockTestHistory.length)
+      : 0,
+    testsPassed: mockTestHistory.filter(test => test.passed).length
+  }), [mockTestHistory]);
+
   if (isLoading) {
     return (
       <div className="test-history">
@@ -108,23 +121,30 @@ const TestHistory: React.FC<TestHistoryProps> = ({ testName, testId }) => {
   return (
     <div className="test-history">
       <div className="history-header">
-        <h2>Test History - {testName}</h2>
+        <div className="history-title-row">
+          <h2>Test History - {testName}</h2>
+          <PDFExportButton
+            testName={testName}
+            userName={user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.email : 'Unknown User'}
+            mockTestHistory={mockTestHistory}
+          />
+        </div>
         <div className="history-stats">
           <div className="stat-item">
-            <span className="stat-value">{mockTestHistory.length}</span>
+            <span className="stat-value">{historyStats.totalTests}</span>
             <span className="stat-label">Mock Tests Completed</span>
           </div>
           {mockTestHistory.length > 0 && (
             <>
               <div className="stat-item">
                 <span className="stat-value">
-                  {Math.round(mockTestHistory.reduce((sum, test) => sum + test.percentage, 0) / mockTestHistory.length)}%
+                  {historyStats.averageScore}%
                 </span>
                 <span className="stat-label">Average Score</span>
               </div>
               <div className="stat-item">
                 <span className="stat-value">
-                  {mockTestHistory.filter(test => test.passed).length}
+                  {historyStats.testsPassed}
                 </span>
                 <span className="stat-label">Tests Passed</span>
               </div>
@@ -144,10 +164,10 @@ const TestHistory: React.FC<TestHistoryProps> = ({ testName, testId }) => {
             {mockTestHistory.map((test) => (
               <div key={test.id} className={`mock-test-card ${test.passed ? 'passed' : 'failed'}`}>
                 <div className="test-score">
-                  <span className="score">{test.score}/{test.totalQuestions}</span>
-                  <span className="percentage">{test.percentage}%</span>
+                  <span className="score">{test.scaledScore}/1000</span>
+                  <span className="percentage">{test.score}/{test.totalQuestions} ({test.percentage}%)</span>
                   <span className={`status ${test.passed ? 'passed' : 'failed'}`}>
-                    {test.passed ? '✅ PASSED' : '❌ FAILED'}
+                    {test.passed ? <><CheckCircle size={12} style={{verticalAlign: 'middle', marginRight: 2}} /> PASSED</> : <><XCircle size={12} style={{verticalAlign: 'middle', marginRight: 2}} /> FAILED</>}
                   </span>
                 </div>
                 <div className="test-details">
@@ -155,7 +175,7 @@ const TestHistory: React.FC<TestHistoryProps> = ({ testName, testId }) => {
                   <span>•</span>
                   <span>{formatTime(test.timeSpent)}</span>
                   <span>•</span>
-                  <span>Passing: {test.passingScore}%</span>
+                  <span>Passing: {test.passingScore}/1000</span>
                 </div>
                 <button 
                   className="view-details-btn"

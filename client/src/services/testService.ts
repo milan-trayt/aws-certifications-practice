@@ -46,18 +46,18 @@ export const testService = {
    * Get all available tests
    */
   async getTests(page = 1, limit = 10): Promise<TestsResponse> {
-    const response = await apiClient.get<TestsResponse>('/tests', {
+    const response = await apiClient.get<{ data: TestsResponse }>('/tests', {
       params: { page, limit },
     });
-    return response.data;
+    return response.data.data;
   },
 
   /**
    * Get specific test metadata
    */
   async getTest(testId: string): Promise<TestResponse> {
-    const response = await apiClient.get<TestResponse>(`/tests/${testId}`);
-    return response.data;
+    const response = await apiClient.get<{ data: TestResponse }>(`/tests/${testId}`);
+    return response.data.data;
   },
 
   /**
@@ -69,33 +69,33 @@ export const testService = {
     limit = 50,
     shuffle = false
   ): Promise<QuestionsResponse> {
-    const response = await apiClient.get<QuestionsResponse>(
+    const response = await apiClient.get<{ data: QuestionsResponse }>(
       `/tests/${testId}/questions`,
       {
         params: { page, limit, shuffle },
       }
     );
-    return response.data;
+    return response.data.data;
   },
 
   /**
    * Get all questions for a test (for practice modes that need all questions)
    */
   async getAllQuestions(testId: string): Promise<QuestionsResponse> {
-    const response = await apiClient.get<QuestionsResponse>(
+    const response = await apiClient.get<{ data: QuestionsResponse }>(
       `/tests/${testId}/questions/all`
     );
-    return response.data;
+    return response.data.data;
   },
 
   /**
    * Get a specific question
    */
   async getQuestion(testId: string, questionId: string): Promise<QuestionResponse> {
-    const response = await apiClient.get<QuestionResponse>(
+    const response = await apiClient.get<{ data: QuestionResponse }>(
       `/tests/${testId}/questions/${questionId}`
     );
-    return response.data;
+    return response.data.data;
   },
 
   /**

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Discussion, DiscussionComment } from '../types';
+import { MessageCircle } from 'lucide-react';
 import './Discussions.css';
 
 interface DiscussionsProps {
@@ -56,7 +57,7 @@ const Discussions: React.FC<DiscussionsProps> = ({ discussions, discussionCount,
     return (
       <div className="discussions-panel" ref={panelRef}>
         <div className="discussions-header">
-          <h3>💬 Discussions</h3>
+          <h3><MessageCircle size={16} style={{verticalAlign: 'middle', marginRight: 4}} /> Discussions</h3>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
         {questionText && (
@@ -75,7 +76,7 @@ const Discussions: React.FC<DiscussionsProps> = ({ discussions, discussionCount,
   return (
     <div className="discussions-panel" ref={panelRef}>
       <div className="discussions-header">
-        <h3>💬 Discussions {discussionCount && `(${discussionCount})`}</h3>
+        <h3><MessageCircle size={16} style={{verticalAlign: 'middle', marginRight: 4}} /> Discussions {discussionCount && `(${discussionCount})`}</h3>
         <button className="close-btn" onClick={onClose}>✕</button>
       </div>
       {questionText && (

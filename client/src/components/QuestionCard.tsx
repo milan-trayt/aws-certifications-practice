@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Question } from '../types';
+import { Bookmark, BookmarkPlus, ImageOff, Check, X, MessageCircle, AlertTriangle } from 'lucide-react';
 import Discussions from './Discussions';
 import './QuestionCard.css';
 
@@ -14,6 +15,8 @@ interface QuestionCardProps {
     isCorrect: boolean;
     timeTaken: number;
   };
+  isBookmarked?: boolean;
+  onToggleBookmark?: (questionId: string) => void;
 }
 
 interface ShuffledChoice {
@@ -31,13 +34,15 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ 
+const QuestionCard: React.FC<QuestionCardProps> = React.memo(({ 
   question, 
   onNext, 
   onAnswerSubmitted,
   showNextButton = true,
   showExplanation = false,
-  previousAnswer
+  previousAnswer,
+  isBookmarked = false,
+  onToggleBookmark
 }) => {
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [showResult, setShowResult] = useState(false);
@@ -87,7 +92,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         } else {
           result.push(
             <div key={`placeholder-${index}`} className="missing-image">
-              <p>📷 Image placeholder - Image not available in dataset</p>
+              <p><ImageOff size={16} style={{verticalAlign: 'middle', marginRight: 4}} /> Image placeholder - Image not available in dataset</p>
             </div>
           );
         }
@@ -129,42 +134,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.question_id, previousAnswer, showExplanation]); // Reset when question changes
-
-  // If question has no valid choices and no image placeholders, show error message
-  if (!hasValidChoices && !hasImagePlaceholder) {
-    return (
-      <div className="question-card">
-        <div className="question-error">
-          <h2>⚠️ Question Error</h2>
-          <p>This question appears to be incomplete or missing answer choices.</p>
-          <p><strong>Question {question.question_number}:</strong> {question.question_text}</p>
-          <button className="next-btn" onClick={() => onNext(false, '', 0)}>
-            Skip Question
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // If question has image placeholders but no valid text choices, show special message
-  if (!hasValidChoices && hasImagePlaceholder) {
-    return (
-      <div className="question-card">
-        <div className="question-error">
-          <h2>📷 Image-Based Question</h2>
-          <p>This question contains images with answer choices that are not available in the current dataset.</p>
-          <p><strong>Question {question.question_number}:</strong></p>
-          <div className="question-text">
-            {renderTextWithImages(question.question_text, question.question_images || [])}
-          </div>
-          <p>The answer choices for this question are likely contained within the images above.</p>
-          <button className="next-btn" onClick={() => onNext(false, '', 0)}>
-            Skip Question
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   const handleAnswerClick = (choice: string) => {
     if (isSubmitted) return;
@@ -215,11 +184,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
     }
   };
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
     const userAnswer = selectedAnswers.length > 0 ? selectedAnswers.join('') : '';
     onNext(isCorrect(), userAnswer, timeTaken);
-  };
+  }, [startTime, selectedAnswers, onNext]);
 
   const getChoiceClass = (choice: string) => {
     if (!showResult) {
@@ -237,8 +206,45 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
   return (
     <div className="question-card">
-      <div className="question-header">
-        <h2>Question {question.question_number}</h2>
+      {/* Error: no valid choices and no image placeholders */}
+      {!hasValidChoices && !hasImagePlaceholder ? (
+        <div className="question-error">
+          <h2><AlertTriangle size={20} style={{verticalAlign: 'middle', marginRight: 4}} /> Question Error</h2>
+          <p>This question appears to be incomplete or missing answer choices.</p>
+          <p><strong>Question {question.question_number}:</strong> {question.question_text}</p>
+          <button className="next-btn" onClick={() => onNext(false, '', 0)}>
+            Skip Question
+          </button>
+        </div>
+      ) : !hasValidChoices && hasImagePlaceholder ? (
+        <div className="question-error">
+          <h2><ImageOff size={20} style={{verticalAlign: 'middle', marginRight: 4}} /> Image-Based Question</h2>
+          <p>This question contains images with answer choices that are not available in the current dataset.</p>
+          <p><strong>Question {question.question_number}:</strong></p>
+          <div className="question-text">
+            {renderTextWithImages(question.question_text, question.question_images || [])}
+          </div>
+          <p>The answer choices for this question are likely contained within the images above.</p>
+          <button className="next-btn" onClick={() => onNext(false, '', 0)}>
+            Skip Question
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="question-header">
+        <div className="header-left">
+          <h2>Question {question.question_number}</h2>
+          {onToggleBookmark && (
+            <button
+              className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+              onClick={() => onToggleBookmark(question.question_id)}
+              aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+              title={isBookmarked ? 'Remove bookmark' : 'Bookmark this question'}
+            >
+              {isBookmarked ? <Bookmark size={16} /> : <BookmarkPlus size={16} />}
+            </button>
+          )}
+        </div>
         <div className="header-right">
           {isMultipleAnswer && !showResult && (
             <span className="multiple-indicator">Multiple Answers</span>
@@ -246,14 +252,15 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           {showResult && (
             <>
               <div className={`result ${isCorrect() ? 'correct' : 'incorrect'}`}>
-                {isCorrect() ? '✓ Correct!' : '✗ Incorrect'}
+                {isCorrect() ? <><Check size={14} /> Correct!</> : <><X size={14} /> Incorrect</>}
               </div>
               {question.discussion && question.discussion.length > 0 && (
                 <button 
                   className="discussions-btn"
                   onClick={() => setShowDiscussions(true)}
+                  aria-label={`View discussions${question.discussion_count ? ` (${question.discussion_count})` : ''}`}
                 >
-                  💬 Discussions {question.discussion_count && `(${question.discussion_count})`}
+                  <MessageCircle size={14} style={{verticalAlign: 'middle', marginRight: 4}} /> Discussions {question.discussion_count && `(${question.discussion_count})`}
                 </button>
               )}
               {showNextButton && (
@@ -276,6 +283,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             key={key}
             className={getChoiceClass(key)}
             onClick={() => handleAnswerClick(key)}
+            role="button"
+            tabIndex={isSubmitted ? -1 : 0}
+            onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !isSubmitted) { e.preventDefault(); handleAnswerClick(key); } }}
           >
             <span className="choice-label">{key}</span>
             <span className="choice-text">
@@ -300,8 +310,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           onClose={() => setShowDiscussions(false)}
         />
       )}
+        </>
+      )}
     </div>
   );
-};
+});
+
+QuestionCard.displayName = 'QuestionCard';
 
 export default QuestionCard;

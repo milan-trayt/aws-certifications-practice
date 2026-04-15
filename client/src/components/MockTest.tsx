@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Question } from '../types';
 import Discussions from './Discussions';
 import { progressService } from '../services/progressService';
+import { PASSING_SCORE_DEFAULT, SCALED_SCORE_MIN, SCALED_SCORE_MAX, TIMER_WARNING_THRESHOLD } from '../constants';
+import { ImageOff, Check, X, MinusCircle, MessageCircle, FileText, Save, ChevronLeft, ChevronRight, Flag, Timer, AlertTriangle } from 'lucide-react';
 import './MockTest.css';
 import './MockTestStart.css';
 
@@ -64,9 +66,9 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
     }
   };
 
-  // Calculate time based on question count (2 hours for 65 questions)
+  // Calculate time based on question count (130 min for 65 questions - real AWS associate exam)
   const calculateTimeLimit = (numQuestions: number) => {
-    const baseTimeMinutes = 120; // 2 hours for 65 questions
+    const baseTimeMinutes = 130; // 130 min for 65 questions (real AWS exam)
     const timePerQuestion = baseTimeMinutes / 65;
     const totalMinutes = timePerQuestion * numQuestions;
     
@@ -147,7 +149,7 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
         } else {
           result.push(
             <div key={`placeholder-${index}`} className="missing-image">
-              <p>📷 Image placeholder - Image not available in dataset</p>
+              <p>Image placeholder - Image not available in dataset</p>
             </div>
           );
         }
@@ -229,7 +231,7 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
   };
 
   // Calculate current progress for real-time display
-  const getCurrentProgress = () => {
+  const currentProgress = useMemo(() => {
     const answeredCount = testAnswers.filter(answer => answer && answer.selectedAnswers.length > 0).length;
     const skippedCount = skippedQuestions.size;
     const flaggedCount = flaggedQuestions.size;
@@ -244,7 +246,7 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
       flaggedQuestions: flaggedQuestionNumbers,
       total: testQuestions.length
     };
-  }; const handleAnswer = (selectedAnswers: string[]) => {
+  }, [testAnswers, skippedQuestions, flaggedQuestions, testQuestions.length]); const handleAnswer = useCallback((selectedAnswers: string[]) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
     const correctAnswers = currentQuestion.correct_answer.split('');
     
@@ -276,9 +278,9 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
     
     // Immediately update progress calculation for real-time stats
     // This allows users to see their current score as they answer questions
-  };
+  }, [testQuestions, currentQuestionIndex, shuffledChoicesMap]);
 
-  const toggleFlag = () => {
+  const toggleFlag = useCallback(() => {
     setFlaggedQuestions(prev => {
       const updated = new Set(prev);
       if (updated.has(currentQuestionIndex)) {
@@ -288,7 +290,7 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
       }
       return updated;
     });
-  };
+  }, [currentQuestionIndex]);
 
   const skipQuestion = () => {
     // Remove the explicit skip function - questions are skipped by going to next without answering
@@ -317,11 +319,11 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
     }
   };
 
-  const previousQuestion = () => {
+  const previousQuestion = useCallback(() => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
     }
-  };
+  }, [currentQuestionIndex]);
 
   const completeTest = async () => {
     setIsTestCompleted(true);
@@ -370,28 +372,32 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
     }
   };
 
-  const calculateScore = () => {
+  const score = useMemo(() => {
     const correctAnswers = testAnswers.filter(answer => answer && answer.isCorrect).length;
+    const percentage = Math.round((correctAnswers / testQuestions.length) * 100);
+    const scaled = Math.round(SCALED_SCORE_MIN + (percentage / 100) * (SCALED_SCORE_MAX - SCALED_SCORE_MIN));
     return {
       correct: correctAnswers,
       total: testQuestions.length,
-      percentage: Math.round((correctAnswers / testQuestions.length) * 100)
+      percentage,
+      scaled,
+      passed: scaled >= PASSING_SCORE_DEFAULT
     };
-  };
+  }, [testAnswers, testQuestions.length]);
 
-  const showDetailedResults = () => {
+  const showDetailedResults = useCallback(() => {
     setShowResults(true);
-  };
+  }, []);
 
-  const backToSummary = () => {
+  const backToSummary = useCallback(() => {
     setShowResults(false);
-  };
+  }, []);
 
   if (!isTestStarted && !isTestCompleted) {
     return (
       <div className="mocktest-start-container">
         <div className="mocktest-start-card">
-          <h2 className="mocktest-start-title">{testName} - Mock Test</h2>
+          <h2 className="mocktest-start-title">{testName} - Practice Mock</h2>
           <div className="mocktest-details-section">
             <div className="mocktest-detail-row">
               <span className="mocktest-detail-label">Questions:</span>
@@ -446,21 +452,26 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
   }
 
   if (isTestCompleted && !showResults) {
-    const score = calculateScore();
     return (
       <div className="mock-test-results">
         <div className="results-card">
-          <h2>🎉 Test Completed!</h2>
+          <h2>{score.passed ? 'Test Passed!' : 'Test Completed'}</h2>
           {isSavingResults && (
             <div className="saving-indicator">
-              <p>💾 Saving your results...</p>
+              <p><Save size={14} style={{verticalAlign: 'middle', marginRight: 4}} /> Saving your results...</p>
             </div>
           )}
           <div className="score-display">
-            <div className="score-circle">
-              <span className="score-percentage">{score.percentage}%</span>
-              <span className="score-fraction">{score.correct}/{score.total}</span>
+            <div className={`score-circle ${score.passed ? '' : 'failed'}`}>
+              <span className="score-percentage">{score.scaled}</span>
+              <span className="score-fraction">/ {SCALED_SCORE_MAX}</span>
             </div>
+          </div>
+          <div className="pass-fail-indicator">
+            <span className={`pass-fail-badge ${score.passed ? 'passed' : 'failed'}`}>
+              {score.passed ? 'PASS' : 'FAIL'}
+            </span>
+            <span className="passing-score-note">Passing score: {PASSING_SCORE_DEFAULT} / {SCALED_SCORE_MAX}</span>
           </div>
           <div className="score-details">
             <div className="score-item correct">
@@ -472,8 +483,8 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
               <span className="score-value">{score.total - score.correct}</span>
             </div>
             <div className="score-item total">
-              <span className="score-label">Total:</span>
-              <span className="score-value">{score.total}</span>
+              <span className="score-label">Percentage:</span>
+              <span className="score-value">{score.percentage}%</span>
             </div>
           </div>
           <div className="results-actions">
@@ -493,9 +504,9 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
     return (
       <div className="detailed-results">
         <div className="results-header">
-          <h2>📋 Detailed Results</h2>
+          <h2><FileText size={20} style={{verticalAlign: 'middle', marginRight: 4}} /> Detailed Results</h2>
           <button className="back-btn" onClick={backToSummary}>
-            ← Back to Summary
+            <ChevronLeft size={14} style={{verticalAlign: 'middle'}} /> Back to Summary
           </button>
         </div>
         
@@ -526,14 +537,14 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
                   <h3>Question {index + 1}</h3>
                   <div className="result-actions">
                     <span className={`result-indicator ${answer ? (answer.isCorrect ? 'correct' : 'incorrect') : 'skipped'}`}>
-                      {answer ? (answer.isCorrect ? '✓ Correct' : '✗ Incorrect') : '⊘ Skipped'}
+                      {answer ? (answer.isCorrect ? <><Check size={12} /> Correct</> : <><X size={12} /> Incorrect</>) : <><MinusCircle size={12} /> Skipped</>}
                     </span>
                     {question.discussion && question.discussion.length > 0 && (
                       <button 
                         className="discussions-btn"
                         onClick={() => setShowDiscussions(index)}
                       >
-                        💬 Discussions {question.discussion_count && `(${question.discussion_count})`}
+                        <MessageCircle size={12} style={{verticalAlign: 'middle', marginRight: 4}} /> Discussions {question.discussion_count && `(${question.discussion_count})`}
                       </button>
                     )}
                   </div>
@@ -575,10 +586,10 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
     <div className="mock-test-active">
       <div className="test-header">
         <div className="test-info">
-          <h2>{testName} - Mock Test</h2>
+          <h2>{testName} - Practice Mock</h2>
           <div className="test-stats">
             {(() => {
-              const progress = getCurrentProgress();
+              const progress = currentProgress;
               return (
                 <>
                   <div className="stat-item">
@@ -662,7 +673,7 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
                 <option key={index} value={index}>
                   Question {index + 1}
                   {testAnswers[index]?.selectedAnswers.length > 0 ? ' ✓' : ''}
-                  {flaggedQuestions.has(index) ? ' 🚩' : ''}
+                  {flaggedQuestions.has(index) ? ' ⚑' : ''}
                 </option>
               ))}
             </select>
@@ -674,8 +685,8 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
             />
           </div>
         </div>
-        <div className={`timer ${timeLeft < 300 ? 'warning' : ''}`}>
-          ⏱️ {formatTime(timeLeft)}
+        <div className={`timer ${timeLeft < TIMER_WARNING_THRESHOLD ? 'warning' : ''}`}>
+          <Timer size={14} style={{verticalAlign: 'middle', marginRight: 4}} /> {formatTime(timeLeft)}
         </div>
       </div>
 
@@ -696,7 +707,7 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
           onClick={previousQuestion}
           disabled={currentQuestionIndex === 0}
         >
-          ← Previous
+          <ChevronLeft size={14} style={{verticalAlign: 'middle'}} /> Previous
         </button>
         
         {currentQuestionIndex === testQuestions.length - 1 ? (
@@ -712,7 +723,7 @@ const MockTest: React.FC<MockTestProps> = ({ questions, testName, testId }) => {
             className="nav-btn next-btn" 
             onClick={nextQuestion}
           >
-            Next →
+            Next <ChevronRight size={14} style={{verticalAlign: 'middle'}} />
           </button>
         )}
       </div>
@@ -781,7 +792,7 @@ const MockQuestionCard: React.FC<MockQuestionCardProps> = ({
         } else {
           result.push(
             <div key={`placeholder-${index}`} className="missing-image">
-              <p>📷 Image placeholder - Image not available in dataset</p>
+              <p>Image placeholder - Image not available in dataset</p>
             </div>
           );
         }
@@ -815,14 +826,14 @@ const MockQuestionCard: React.FC<MockQuestionCardProps> = ({
             <span className="multiple-indicator">Multiple Answers</span>
           )}
           {!hasValidChoices && hasImagePlaceholder && (
-            <span className="multiple-indicator">📷 Image-Based</span>
+            <span className="multiple-indicator"><ImageOff size={12} style={{verticalAlign: 'middle', marginRight: 2}} /> Image-Based</span>
           )}
           <button 
             className={`flag-btn ${isFlagged ? 'flagged' : ''}`}
             onClick={onToggleFlag}
             title={isFlagged ? 'Remove flag' : 'Flag question'}
           >
-            🚩
+            <Flag size={14} />
           </button>
         </div>
       </div>
@@ -838,6 +849,9 @@ const MockQuestionCard: React.FC<MockQuestionCardProps> = ({
               key={key}
               className={`choice ${selectedAnswers.includes(key) ? 'selected' : ''}`}
               onClick={() => handleAnswerClick(key)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAnswerClick(key); } }}
             >
               <span className="choice-label">{key}</span>
               <span className="choice-text">
@@ -848,13 +862,13 @@ const MockQuestionCard: React.FC<MockQuestionCardProps> = ({
         </div>
       ) : hasImagePlaceholder ? (
         <div className="question-error">
-          <p>📷 This question contains images with answer choices that are not available in the current dataset.</p>
+          <p><ImageOff size={14} style={{verticalAlign: 'middle', marginRight: 4}} /> This question contains images with answer choices that are not available in the current dataset.</p>
           <p>The answer choices for this question are likely contained within the images above.</p>
           <p><em>Note: This question will be automatically marked as incorrect in the test results.</em></p>
         </div>
       ) : (
         <div className="question-error">
-          <p>⚠️ This question appears to be missing answer choices.</p>
+          <p><AlertTriangle size={14} style={{verticalAlign: 'middle', marginRight: 4}} /> This question appears to be missing answer choices.</p>
         </div>
       )}
 

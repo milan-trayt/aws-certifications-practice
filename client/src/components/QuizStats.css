@@ -1,8 +1,8 @@
 .quiz-stats {
-  background: white;
+  background: var(--color-card-bg);
   padding: 10px 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--color-shadow);
   margin-bottom: 20px;
 }
 
@@ -15,7 +15,7 @@
 }
 
 .stats-container h1 {
-  color: #333;
+  color: var(--color-text-primary);
   margin: 0;
   font-size: 1.2rem;
   word-wrap: break-word;
@@ -29,14 +29,14 @@
   flex: 1;
   min-width: 150px;
   height: 6px;
-  background: #e9ecef;
+  background: var(--color-border);
   border-radius: 3px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #007bff, #0056b3);
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
   transition: width 0.3s ease;
 }
 
@@ -55,17 +55,17 @@
 
 .stat-compact {
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .stat-compact strong {
-  color: #333;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
 .restart-btn {
-  background: #6c757d;
+  background: var(--color-text-secondary);
   color: white;
   border: none;
   padding: 6px 12px;
@@ -77,7 +77,7 @@
 }
 
 .restart-btn:hover {
-  background: #545b62;
+  background: var(--color-text-primary);
 }
 
 @media (max-width: 1024px) {

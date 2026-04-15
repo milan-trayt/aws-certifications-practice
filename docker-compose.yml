@@ -6,9 +6,9 @@ services:
     image: postgres:15-alpine
     container_name: aws-practice-db
     environment:
-      POSTGRES_DB: aws_practice
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${POSTGRES_DB:-aws_practice}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     ports:
       - "5432:5432"
     volumes:
@@ -17,6 +17,26 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: aws-practice-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Node.js Backend Server
   server:
@@ -25,11 +45,16 @@ services:
       dockerfile: Dockerfile
     container_name: aws-practice-server
     environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://postgres:password@database:5432/aws_practice
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
-      JWT_EXPIRES_IN: 24h
-      CORS_ORIGIN: http://localhost:3000
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@database:5432/${POSTGRES_DB:-aws_practice}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      CSRF_SECRET: ${CSRF_SECRET:-}
+      COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:-}
+      COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID:-}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       CHOKIDAR_USEPOLLING: true
     ports:
       - "5000:5000"
@@ -38,13 +63,22 @@ services:
       - /app/node_modules
       - server_logs:/app/logs
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app-network
     command: npm run dev
     restart: unless-stopped
     stdin_open: true
     tty: true
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # React Frontend Client
   client:
@@ -53,7 +87,9 @@ services:
       dockerfile: Dockerfile
     container_name: aws-practice-client
     environment:
-      REACT_APP_API_URL: http://localhost:5000/api
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5000/api}
+      REACT_APP_COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID:-}
+      REACT_APP_COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID:-}
       CHOKIDAR_USEPOLLING: true
       WATCHPACK_POLLING: true
       FAST_REFRESH: true

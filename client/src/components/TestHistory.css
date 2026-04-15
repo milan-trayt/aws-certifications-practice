@@ -1,20 +1,43 @@
 .test-history {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 20px clamp(16px, 3vw, 48px);
+  width: 100%;
 }
 
-.test-history {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+.history-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .history-header h2 {
-  margin: 0 0 20px 0;
-  color: #1a1a1a;
+  margin: 0;
+  color: var(--color-text-primary);
   font-size: 1.5rem;
   font-weight: 500;
+}
+
+.export-pdf-btn {
+  padding: 8px 16px;
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.export-pdf-btn:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.export-pdf-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .history-stats {
@@ -31,25 +54,25 @@
   display: block;
   font-size: 1.75rem;
   font-weight: 600;
-  color: #2563eb;
+  color: var(--color-accent);
   margin-bottom: 4px;
 }
 
 .history-stats .stat-label {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .loading, .error-message {
   text-align: center;
   padding: 40px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .error-message button {
   margin-top: 10px;
   padding: 8px 16px;
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
   border: none;
   border-radius: 4px;
@@ -58,13 +81,13 @@
 }
 
 .error-message button:hover {
-  background: #2563eb;
+  background: var(--color-accent-hover);
 }
 
 .no-history {
   text-align: center;
   padding: 60px 20px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .no-history p {
@@ -82,22 +105,22 @@
 }
 
 .mock-test-card {
-  background: white;
+  background: var(--color-card-bg);
   padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
 }
 
 .mock-test-card.passed {
-  border-left: 3px solid #10b981;
+  border-left: 3px solid var(--color-success);
 }
 
 .mock-test-card.failed {
-  border-left: 3px solid #ef4444;
+  border-left: 3px solid var(--color-danger);
 }
 
 .test-score {
@@ -110,12 +133,12 @@
 .test-score .score {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-text-primary);
 }
 
 .test-score .percentage {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .test-score .status {
@@ -141,7 +164,7 @@
   gap: 12px;
   flex: 1;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   margin: 0 16px;
 }
 
@@ -151,7 +174,7 @@
 
 .view-details-btn {
   padding: 6px 12px;
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
   border: none;
   border-radius: 4px;
@@ -162,7 +185,7 @@
 }
 
 .view-details-btn:hover {
-  background: #2563eb;
+  background: var(--color-accent-hover);
 }
 
 /* Responsive Design */

@@ -9,10 +9,21 @@ const { Pool } = require('pg');
 const authRoutes = require('./routes/auth');
 const testRoutes = require('./routes/tests');
 const progressRoutes = require('./routes/progress');
+const usersRoutes = require('./routes/users');
+const bookmarksRoutes = require('./routes/bookmarks');
+const adminRoutes = require('./routes/admin');
+
+// Initialize cache service
+const cacheService = require('./utils/cacheService');
+cacheService.init();
 
 // Import middleware
-const { authMiddleware } = require('./middleware/auth');
+const { cognitoAuthMiddleware } = require('./middleware/cognitoAuth');
 const errorHandler = require('./middleware/errorHandler');
+const requestIdMiddleware = require('./middleware/requestId');
+const cookieParser = require('cookie-parser');
+const { csrfTokenHandler, doubleCsrfProtection } = require('./middleware/csrf');
+const cspNonceMiddleware = require('./middleware/cspNonce');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -39,14 +50,20 @@ pool.connect((err, client, release) => {
 // Make pool available to routes
 app.locals.db = pool;
 
+// Generate CSP nonce per request (must run before Helmet)
+// Validates: Requirements 8.1, 8.2, 8.3
+app.use(cspNonceMiddleware);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", (req, res) => `'nonce-${res.locals.cspNonce}'`],
       scriptSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "https:"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
     },
   },
   crossOriginEmbedderPolicy: false
@@ -60,32 +77,48 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    error: 'Too many requests from this IP, please try again later.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use('/api/', limiter);
+const { RATE_LIMIT_GENERAL } = require('./utils/constants');
 
-// Stricter rate limiting for auth endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 auth requests per windowMs (increased for development)
-  message: {
-    error: 'Too many authentication attempts, please try again later.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+const isDev = process.env.NODE_ENV !== 'production';
+
+// Rate limiting — skip entirely in development
+if (!isDev) {
+  const limiter = rateLimit({
+    windowMs: RATE_LIMIT_GENERAL.windowMs,
+    max: RATE_LIMIT_GENERAL.max,
+    message: {
+      error: 'Too many requests from this IP, please try again later.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use('/api/', limiter);
+}
+
+// Endpoint-specific rate limiters for public auth endpoints (production only)
+// Validates: Requirements 9.1, 9.2, 9.3, 9.4
+const { loginLimiter, registerLimiter, forgotPasswordLimiter } = require('./middleware/rateLimiters');
+if (!isDev) {
+  app.use('/api/auth/login', loginLimiter);
+  app.use('/api/auth/register', registerLimiter);
+  app.use('/api/auth/forgot-password', forgotPasswordLimiter);
+}
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Cookie parser (required by csrf-csrf)
+app.use(cookieParser());
+
+// Request ID middleware (after body parser, before routes)
+app.use(requestIdMiddleware);
+
+// CSRF token endpoint (before CSRF validation middleware)
+app.get('/api/csrf-token', csrfTokenHandler);
+
+// CSRF validation middleware (validates POST, PUT, PATCH, DELETE requests)
+app.use(doubleCsrfProtection);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -97,9 +130,12 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
-app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/tests', testRoutes);
-app.use('/api/progress', authMiddleware, progressRoutes);
+app.use('/api/progress', cognitoAuthMiddleware, progressRoutes);
+app.use('/api/users', cognitoAuthMiddleware, usersRoutes);
+app.use('/api/bookmarks', cognitoAuthMiddleware, bookmarksRoutes);
+app.use('/api/admin', cognitoAuthMiddleware, adminRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

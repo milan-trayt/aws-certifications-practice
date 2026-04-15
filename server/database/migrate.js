@@ -217,8 +217,9 @@ async function rollbackMigration() {
     
     // Delete in reverse order due to foreign key constraints
     await client.query('DELETE FROM mock_test_answers');
-    await client.query('DELETE FROM mock_test_results');
-    await client.query('DELETE FROM user_progress');
+    // Soft-delete tables with deleted_at column
+    await client.query('UPDATE mock_test_results SET deleted_at = CURRENT_TIMESTAMP WHERE deleted_at IS NULL');
+    await client.query('UPDATE user_progress SET deleted_at = CURRENT_TIMESTAMP WHERE deleted_at IS NULL');
     await client.query('DELETE FROM questions');
     await client.query('DELETE FROM tests');
     

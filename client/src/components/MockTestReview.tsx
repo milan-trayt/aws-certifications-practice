@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { progressService } from '../services/progressService';
 import Discussions from './Discussions';
+import { CheckCircle, XCircle, Timer, MessageCircle, ImageOff, MinusCircle } from 'lucide-react';
 import './MockTestReview.css';
 
 interface MockTestReviewProps {
@@ -20,6 +21,7 @@ interface MockTestDetails {
     passingScore: number;
     passed: boolean;
     percentage: number;
+    scaledScore: number;
   };
   answers: Array<{
     questionId: string;
@@ -122,7 +124,7 @@ const MockTestReview: React.FC<MockTestReviewProps> = ({ mockTestId, onClose }) 
         } else {
           result.push(
             <div key={`placeholder-${index}`} className="missing-image">
-              <p>📷 Image placeholder - Image not available in dataset</p>
+              <p>Image placeholder - Image not available in dataset</p>
             </div>
           );
         }
@@ -194,11 +196,11 @@ const MockTestReview: React.FC<MockTestReviewProps> = ({ mockTestId, onClose }) 
         <div className="summary-stats">
           <div className={`score-card ${mockTest.passed ? 'passed' : 'failed'}`}>
             <div className="score-main">
-              <span className="score-value">{mockTest.score}/{mockTest.totalQuestions}</span>
-              <span className="score-percentage">{mockTest.percentage}%</span>
+              <span className="score-value">{mockTest.scaledScore}/1000</span>
+              <span className="score-percentage">{mockTest.score}/{mockTest.totalQuestions} ({mockTest.percentage}%)</span>
             </div>
             <div className={`score-status ${mockTest.passed ? 'passed' : 'failed'}`}>
-              {mockTest.passed ? '✅ PASSED' : '❌ FAILED'}
+              {mockTest.passed ? <><CheckCircle size={14} style={{verticalAlign: 'middle', marginRight: 2}} /> PASSED</> : <><XCircle size={14} style={{verticalAlign: 'middle', marginRight: 2}} /> FAILED</>}
             </div>
           </div>
           
@@ -209,7 +211,7 @@ const MockTestReview: React.FC<MockTestReviewProps> = ({ mockTestId, onClose }) 
             </div>
             <div className="detail-item">
               <span className="detail-label">Passing Score:</span>
-              <span className="detail-value">{mockTest.passingScore}%</span>
+              <span className="detail-value">{mockTest.passingScore}/1000</span>
             </div>
             <div className="detail-item">
               <span className="detail-label">Correct Answers:</span>
@@ -235,9 +237,9 @@ const MockTestReview: React.FC<MockTestReviewProps> = ({ mockTestId, onClose }) 
                 <h3>Question {index + 1}</h3>
                 <div className="question-meta">
                   <span className={`result-indicator ${isSkipped ? 'skipped' : (answer.isCorrect ? 'correct' : 'incorrect')}`}>
-                    {isSkipped ? '⊘ Skipped' : (answer.isCorrect ? '✅ Correct' : '❌ Incorrect')}
+                    {isSkipped ? <><MinusCircle size={12} style={{verticalAlign: 'middle', marginRight: 2}} /> Skipped</> : (answer.isCorrect ? <><CheckCircle size={12} style={{verticalAlign: 'middle', marginRight: 2}} /> Correct</> : <><XCircle size={12} style={{verticalAlign: 'middle', marginRight: 2}} /> Incorrect</>)}
                   </span>
-                  <span className="time-taken">⏱️ {formatTime(answer.timeTaken)}</span>
+                  <span className="time-taken"><Timer size={12} style={{verticalAlign: 'middle', marginRight: 2}} /> {formatTime(answer.timeTaken)}</span>
                 </div>
               </div>
               {answer.discussion && answer.discussion.length > 0 && (
@@ -245,7 +247,7 @@ const MockTestReview: React.FC<MockTestReviewProps> = ({ mockTestId, onClose }) 
                   className="discussions-btn"
                   onClick={() => setShowDiscussions(index)}
                 >
-                  💬 Discussions {answer.discussionCount && `(${answer.discussionCount})`}
+                  <MessageCircle size={12} style={{verticalAlign: 'middle', marginRight: 4}} /> Discussions {answer.discussionCount && `(${answer.discussionCount})`}
                 </button>
               )}
             </div>

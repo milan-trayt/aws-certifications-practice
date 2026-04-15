@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { Dice5, Timer, Monitor, BookOpen, Target, Brain, BarChart3, Bookmark, Search } from 'lucide-react';
 import './TabNavigation.css';
 
-export type TabType = 'random' | 'mock' | 'practice' | 'study' | 'history';
+export type TabType = 'random' | 'mock' | 'fullmock' | 'practice' | 'study' | 'spaced-repetition' | 'history' | 'bookmarks' | 'search';
 
 interface TabNavigationProps {
   activeTab: TabType;
@@ -12,11 +13,15 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const tabs = [
-    { id: 'random' as TabType, label: 'Random Practice', icon: '🎲' },
-    { id: 'mock' as TabType, label: 'Mock Test', icon: '⏱️' },
-    { id: 'practice' as TabType, label: 'Practice Mode', icon: '📚' },
-    { id: 'study' as TabType, label: 'Study Mode', icon: '🎯' },
-    { id: 'history' as TabType, label: 'Test History', icon: '📊' }
+    { id: 'random' as TabType, label: 'Random Practice', icon: <Dice5 size={18} /> },
+    { id: 'mock' as TabType, label: 'Practice Mock', icon: <Timer size={18} /> },
+    { id: 'fullmock' as TabType, label: 'Full Mock', icon: <Monitor size={18} /> },
+    { id: 'practice' as TabType, label: 'Practice Mode', icon: <BookOpen size={18} /> },
+    { id: 'study' as TabType, label: 'Study Mode', icon: <Target size={18} /> },
+    { id: 'spaced-repetition' as TabType, label: 'Spaced Repetition', icon: <Brain size={18} /> },
+    { id: 'history' as TabType, label: 'Test History', icon: <BarChart3 size={18} /> },
+    { id: 'bookmarks' as TabType, label: 'Bookmarks', icon: <Bookmark size={18} /> },
+    { id: 'search' as TabType, label: 'Search', icon: <Search size={18} /> }
   ];
 
   const handleTabChange = (tab: TabType) => {
@@ -31,14 +36,17 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
   const activeTabData = tabs.find(tab => tab.id === activeTab);
 
   return (
-    <div className="tab-navigation">
+    <nav className="tab-navigation" aria-label="Mode navigation">
       {/* Desktop Navigation */}
-      <div className="desktop-tabs">
+      <div className="desktop-tabs" role="tablist" aria-label="Practice modes">
         {tabs.map(tab => (
           <button
             key={tab.id}
             className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
             onClick={() => handleTabChange(tab.id)}
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-label={tab.label}
           >
             <span className="tab-icon">{tab.icon}</span>
             <span className="tab-label">{tab.label}</span>
@@ -86,7 +94,8 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange })
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
-    </div>
+    </nav>
+
   );
 };
 

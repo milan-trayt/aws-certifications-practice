@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoginForm from '../components/auth/LoginForm';
 import RegisterForm from '../components/auth/RegisterForm';
+import ForgotPasswordForm from '../components/auth/ForgotPasswordForm';
 import './AuthPage.css';
 
+type AuthView = 'login' | 'register' | 'forgot-password';
+
 const AuthPage: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [view, setView] = useState<AuthView>('login');
+  const [loginSuccessMessage, setLoginSuccessMessage] = useState('');
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -16,6 +20,11 @@ const AuthPage: React.FC = () => {
       navigate('/', { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate]);
+
+  const handleSwitchToLogin = (successMessage?: string) => {
+    setView('login');
+    setLoginSuccessMessage(successMessage || '');
+  };
 
   // Show loading while checking auth state
   if (isLoading) {
@@ -36,10 +45,18 @@ const AuthPage: React.FC = () => {
           <p>Professional certification practice platform</p>
         </div>
 
-        {isLogin ? (
-          <LoginForm onSwitchToRegister={() => setIsLogin(false)} />
-        ) : (
-          <RegisterForm onSwitchToLogin={() => setIsLogin(true)} />
+        {view === 'login' && (
+          <LoginForm
+            onSwitchToRegister={() => { setLoginSuccessMessage(''); setView('register'); }}
+            onSwitchToForgotPassword={() => { setLoginSuccessMessage(''); setView('forgot-password'); }}
+            successMessage={loginSuccessMessage}
+          />
+        )}
+        {view === 'register' && (
+          <RegisterForm onSwitchToLogin={() => handleSwitchToLogin()} />
+        )}
+        {view === 'forgot-password' && (
+          <ForgotPasswordForm onSwitchToLogin={handleSwitchToLogin} />
         )}
 
         <div className="auth-footer">

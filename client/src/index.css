@@ -1,21 +1,85 @@
+/* ===== Theme Custom Properties ===== */
+:root {
+  --color-bg: #fafbfc;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #f8f9fa;
+  --color-text-primary: #2c3e50;
+  --color-text-secondary: #7f8c8d;
+  --color-text-muted: #95a5a6;
+  --color-border: #e1e8ed;
+  --color-border-light: #f1f3f4;
+  --color-accent: #3498db;
+  --color-accent-hover: #2980b9;
+  --color-danger: #e74c3c;
+  --color-danger-hover: #c0392b;
+  --color-success: #27ae60;
+  --color-warning-bg: #fff3cd;
+  --color-warning-text: #856404;
+  --color-warning-border: #ffeaa7;
+  --color-error-bg: #f8d7da;
+  --color-error-text: #721c24;
+  --color-shadow: rgba(0, 0, 0, 0.06);
+  --color-shadow-strong: rgba(0, 0, 0, 0.1);
+  --color-input-bg: #ffffff;
+  --color-input-disabled-bg: #f8f9fa;
+  --color-card-bg: #ffffff;
+  --color-fullmock-btn: #1a1a2e;
+  --color-fullmock-btn-hover: #2d2d4e;
+  --color-auth-gradient-start: #667eea;
+  --color-auth-gradient-end: #764ba2;
+  --color-link: #3498db;
+  --color-link-hover: #2980b9;
+}
+
+[data-theme="dark"] {
+  --color-bg: #1a1a2e;
+  --color-bg-secondary: #16213e;
+  --color-bg-tertiary: #0f3460;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #a0a0b0;
+  --color-text-muted: #808090;
+  --color-border: #2a2a4a;
+  --color-border-light: #252545;
+  --color-accent: #5dade2;
+  --color-accent-hover: #3498db;
+  --color-danger: #e74c3c;
+  --color-danger-hover: #c0392b;
+  --color-success: #2ecc71;
+  --color-warning-bg: #3d3200;
+  --color-warning-text: #ffd700;
+  --color-warning-border: #665200;
+  --color-error-bg: #4a1c24;
+  --color-error-text: #f8a0a8;
+  --color-shadow: rgba(0, 0, 0, 0.3);
+  --color-shadow-strong: rgba(0, 0, 0, 0.5);
+  --color-input-bg: #1e1e3a;
+  --color-input-disabled-bg: #252545;
+  --color-card-bg: #16213e;
+  --color-fullmock-btn: #5dade2;
+  --color-fullmock-btn-hover: #3498db;
+  --color-auth-gradient-start: #1a1a2e;
+  --color-auth-gradient-end: #16213e;
+  --color-link: #5dade2;
+  --color-link-hover: #3498db;
+}
+
 /* Hide scrollbars globally while maintaining scroll functionality */
 html, body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 html::-webkit-scrollbar, body::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+  display: none;
 }
 
-/* Apply to all elements */
 * {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 *::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+  display: none;
 }
 
 body {
@@ -25,9 +89,30 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* ===== Global Focus-Visible Styles ===== */
+/* Provides visible focus indicators for keyboard navigation (not mouse clicks) */
+*:focus-visible {
+  outline: 2px solid var(--color-accent, #2563eb);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Higher contrast focus ring for dark mode */
+[data-theme="dark"] *:focus-visible {
+  outline-color: #60a5fa;
+}
+
+/* Remove default outline for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
 }

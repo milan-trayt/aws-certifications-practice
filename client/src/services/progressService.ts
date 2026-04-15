@@ -61,6 +61,7 @@ interface MockTestResult {
   passingScore: number;
   passed: boolean;
   percentage: number;
+  scaledScore: number;
 }
 
 interface MockTestHistoryResponse {
@@ -122,8 +123,74 @@ interface UserStatistics {
   }>;
 }
 
+// Spaced Repetition Types
+export interface SpacedRepetitionQuestion {
+  questionId: string;
+  questionNumber: number;
+  questionText: string;
+  choices: Record<string, string>;
+  correctAnswer: string;
+  isMultipleChoice: boolean;
+  correctCount: number;
+  incorrectCount: number;
+  easeFactor: number;
+  intervalDays: number;
+  repetitionCount: number;
+  nextReviewAt: string | null;
+  masteryLevel: 'new' | 'learning' | 'reviewing' | 'mastered';
+  discussion?: any;
+  discussionCount?: number;
+}
+
+interface SpacedRepetitionResponse {
+  test: { id: string; name: string };
+  questions: SpacedRepetitionQuestion[];
+}
+
+interface SpacedRepetitionUpdateRequest {
+  testId: string;
+  questionId: string;
+  isCorrect: boolean;
+  quality?: number;
+}
+
+interface SpacedRepetitionUpdateResponse {
+  message: string;
+  progress: {
+    id: number;
+    questionId: string;
+    testId: string;
+    isCorrect: boolean;
+    quality: number;
+    correctCount: number;
+    incorrectCount: number;
+    easeFactor: number;
+    intervalDays: number;
+    repetitionCount: number;
+    nextReviewAt: string;
+    masteryLevel: 'new' | 'learning' | 'reviewing' | 'mastered';
+    updatedAt: string;
+  };
+}
+
 export const progressService = {
   // Study Mode Progress
+  /**
+   * Get spaced repetition questions for a test
+   */
+  async getSpacedRepetitionQuestions(testId: string): Promise<SpacedRepetitionResponse> {
+    const response = await apiClient.get<{ data: SpacedRepetitionResponse }>(`/progress/spaced-repetition/${testId}`);
+    return response.data.data;
+  },
+
+  /**
+   * Update spaced repetition progress after answering a question
+   */
+  async updateSpacedRepetition(data: SpacedRepetitionUpdateRequest): Promise<SpacedRepetitionUpdateResponse> {
+    const response = await apiClient.post<{ data: SpacedRepetitionUpdateResponse }>('/progress/spaced-repetition', data);
+    return response.data.data;
+  },
+
   /**
    * Save progress for a single question in Study Mode
    */
@@ -135,8 +202,8 @@ export const progressService = {
    * Get Study Mode progress for a specific test
    */
   async getStudyProgress(testId: string): Promise<StudyProgressResponse> {
-    const response = await apiClient.get<StudyProgressResponse>(`/progress/study/${testId}`);
-    return response.data;
+    const response = await apiClient.get<{ data: StudyProgressResponse }>(`/progress/study/${testId}`);
+    return response.data.data;
   },
 
   // Mock Test Results
@@ -160,18 +227,18 @@ export const progressService = {
       params.testId = testId;
     }
 
-    const response = await apiClient.get<MockTestHistoryResponse>('/progress/mock-tests', {
+    const response = await apiClient.get<{ data: MockTestHistoryResponse }>('/progress/mock-tests', {
       params,
     });
-    return response.data;
+    return response.data.data;
   },
 
   /**
    * Get detailed Mock Test result
    */
   async getMockTestDetails(mockTestId: number): Promise<MockTestDetailResponse> {
-    const response = await apiClient.get<MockTestDetailResponse>(`/progress/mock-tests/${mockTestId}`);
-    return response.data;
+    const response = await apiClient.get<{ data: MockTestDetailResponse }>(`/progress/mock-tests/${mockTestId}`);
+    return response.data.data;
   },
 
   // User Statistics
@@ -179,8 +246,8 @@ export const progressService = {
    * Get user statistics
    */
   async getUserStatistics(): Promise<UserStatistics> {
-    const response = await apiClient.get<UserStatistics>('/progress/stats');
-    return response.data;
+    const response = await apiClient.get<{ data: UserStatistics }>('/progress/stats');
+    return response.data.data;
   },
 
   // Local Storage Helpers for Study Mode

@@ -2,15 +2,15 @@
   max-width: 500px;
   margin: 2rem auto;
   padding: 2rem;
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px var(--color-shadow-strong);
 }
 
 .auth-form h2 {
   text-align: center;
   margin-bottom: 2rem;
-  color: #2c3e50;
+  color: var(--color-text-primary);
   font-size: 1.8rem;
   font-weight: 600;
 }
@@ -28,7 +28,7 @@
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #34495e;
+  color: var(--color-text-primary);
   font-weight: 500;
   font-size: 0.9rem;
 }
@@ -36,28 +36,30 @@
 .form-group input {
   width: 100%;
   padding: 0.75rem;
-  border: 2px solid #e1e8ed;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
   box-sizing: border-box;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .form-group input:disabled {
-  background-color: #f8f9fa;
+  background-color: var(--color-input-disabled-bg);
   cursor: not-allowed;
 }
 
 .password-requirements {
   display: block;
   margin-top: 0.5rem;
-  color: #7f8c8d;
+  color: var(--color-text-secondary);
   font-size: 0.8rem;
   line-height: 1.4;
 }
@@ -65,7 +67,7 @@
 .auth-button {
   width: 100%;
   padding: 0.875rem;
-  background: linear-gradient(135deg, #3498db, #2980b9);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
   color: white;
   border: none;
   border-radius: 8px;
@@ -77,13 +79,13 @@
 }
 
 .auth-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2980b9, #21618c);
+  background: linear-gradient(135deg, var(--color-accent-hover), #21618c);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 4px 8px var(--color-shadow-strong);
 }
 
 .auth-button:disabled {
-  background: #bdc3c7;
+  background: var(--color-text-muted);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -93,18 +95,18 @@
   text-align: center;
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #ecf0f1;
+  border-top: 1px solid var(--color-border-light);
 }
 
 .auth-switch p {
-  color: #7f8c8d;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .link-button {
   background: none;
   border: none;
-  color: #3498db;
+  color: var(--color-link);
   cursor: pointer;
   text-decoration: underline;
   font-size: inherit;
@@ -113,22 +115,71 @@
 }
 
 .link-button:hover:not(:disabled) {
-  color: #2980b9;
+  color: var(--color-link-hover);
 }
 
 .link-button:disabled {
-  color: #bdc3c7;
+  color: var(--color-text-muted);
   cursor: not-allowed;
 }
 
 .error-message {
-  background: #e74c3c;
+  background: var(--color-danger);
   color: white;
   padding: 0.875rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
   line-height: 1.4;
+}
+
+.success-message {
+  background: var(--color-success);
+  color: white;
+  padding: 0.875rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Verification info text */
+.verification-info {
+  text-align: center;
+  color: var(--color-text-primary);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Real-time password checklist */
+.password-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+.password-checklist li {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.password-checklist .check-icon {
+  font-weight: 700;
+  width: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.password-checklist .check-met {
+  color: var(--color-success);
+}
+
+.password-checklist .check-unmet {
+  color: var(--color-text-muted);
 }
 
 /* Responsive design */

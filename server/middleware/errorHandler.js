@@ -1,57 +1,93 @@
+const { sendError } = require('../utils/responseHelper');
+
+/**
+ * Centralized error-handling middleware.
+ *
+ * Validates: Requirements 18.1, 18.2, 18.3, 18.4
+ *
+ * - Includes req.requestId in every log message
+ * - Maps known error types to appropriate HTTP status codes
+ * - Uses sendError response helper for consistent format
+ * - Suppresses stack traces in production responses
+ */
 const errorHandler = (err, req, res, next) => {
-  console.error('Error:', err);
+  const requestId = req.requestId || 'unknown';
+  const isProduction = process.env.NODE_ENV === 'production';
 
-  // Default error
-  let error = {
-    message: 'Internal Server Error',
-    status: 500
-  };
+  // Determine status code and error code/message from the error type
+  let statusCode = 500;
+  let errorCode = 'INTERNAL_ERROR';
+  let message = 'Internal Server Error';
 
-  // Validation errors
+  // --- Validation errors ---
   if (err.name === 'ValidationError') {
-    error.message = Object.values(err.errors).map(val => val.message).join(', ');
-    error.status = 400;
+    statusCode = 400;
+    errorCode = 'VALIDATION_ERROR';
+    message = err.errors
+      ? Object.values(err.errors).map(val => val.message).join(', ')
+      : err.message || 'Validation failed';
   }
 
-  // Duplicate key error (PostgreSQL)
-  if (err.code === '23505') {
-    error.message = 'Resource already exists';
-    error.status = 409;
+  // --- Authentication errors (JWT) ---
+  else if (err.name === 'JsonWebTokenError') {
+    statusCode = 401;
+    errorCode = 'AUTH_ERROR';
+    message = 'Invalid token';
+  } else if (err.name === 'TokenExpiredError') {
+    statusCode = 401;
+    errorCode = 'AUTH_ERROR';
+    message = 'Token expired';
   }
 
-  // Foreign key constraint error (PostgreSQL)
-  if (err.code === '23503') {
-    error.message = 'Referenced resource does not exist';
-    error.status = 400;
+  // --- Authorization / Forbidden ---
+  else if (err.name === 'ForbiddenError' || err.status === 403) {
+    statusCode = 403;
+    errorCode = 'FORBIDDEN';
+    message = err.message || 'Forbidden';
   }
 
-  // Not null constraint error (PostgreSQL)
-  if (err.code === '23502') {
-    error.message = 'Required field is missing';
-    error.status = 400;
+  // --- Not Found ---
+  else if (err.name === 'NotFoundError' || err.status === 404) {
+    statusCode = 404;
+    errorCode = 'NOT_FOUND';
+    message = err.message || 'Resource not found';
   }
 
-  // JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    error.message = 'Invalid token';
-    error.status = 401;
+  // --- DB constraint: unique violation (PostgreSQL 23505) ---
+  else if (err.code === '23505') {
+    statusCode = 409;
+    errorCode = 'CONFLICT';
+    message = 'Resource already exists';
   }
 
-  if (err.name === 'TokenExpiredError') {
-    error.message = 'Token expired';
-    error.status = 401;
+  // --- DB constraint: foreign key violation (PostgreSQL 23503) ---
+  else if (err.code === '23503') {
+    statusCode = 409;
+    errorCode = 'CONFLICT';
+    message = 'Referenced resource does not exist';
   }
 
-  // Custom error handling
-  if (err.status) {
-    error.status = err.status;
-    error.message = err.message;
+  // --- DB constraint: not-null violation (PostgreSQL 23502) ---
+  else if (err.code === '23502') {
+    statusCode = 400;
+    errorCode = 'VALIDATION_ERROR';
+    message = 'Required field is missing';
   }
 
-  res.status(error.status).json({
-    error: error.message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
+  // --- Custom errors with an explicit status ---
+  else if (err.status) {
+    statusCode = err.status;
+    errorCode = err.code || errorCode;
+    message = err.message || message;
+  }
+
+  // Log with requestId for traceability
+  console.error(`[${requestId}] ${err.name || 'Error'}: ${err.message || message}`);
+  if (!isProduction && err.stack) {
+    console.error(`[${requestId}] Stack: ${err.stack}`);
+  }
+
+  sendError(res, errorCode, message, statusCode);
 };
 
 module.exports = errorHandler;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import './Pagination.css';
 
 interface PaginationProps {
@@ -11,7 +11,7 @@ interface PaginationProps {
   className?: string;
 }
 
-const Pagination: React.FC<PaginationProps> = ({
+const Pagination: React.FC<PaginationProps> = React.memo(({
   currentPage,
   totalPages,
   onPageChange,
@@ -20,7 +20,7 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageInputSubmit,
   className = ''
 }) => {
-  const getPaginationButtons = () => {
+  const paginationButtons = useMemo(() => {
     const buttons = [];
     const maxVisible = 5;
     
@@ -64,20 +64,21 @@ const Pagination: React.FC<PaginationProps> = ({
     }
 
     return buttons;
-  };
+  }, [currentPage, totalPages, onPageChange]);
 
   return (
-    <div className={`pagination ${className}`}>
+    <nav className={`pagination ${className}`} aria-label="Pagination">
       <button 
         className="nav-btn prev-btn" 
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
+        aria-label="Previous page"
       >
         ← Previous
       </button>
       
       <div className="page-buttons">
-        {getPaginationButtons()}
+        {paginationButtons}
         <form onSubmit={onPageInputSubmit} className="page-input-form">
           <input
             type="number"
@@ -87,6 +88,7 @@ const Pagination: React.FC<PaginationProps> = ({
             onChange={(e) => onPageInputChange(e.target.value)}
             placeholder={`Go to page (1-${totalPages})`}
             className="page-input"
+            aria-label={`Go to page, 1 to ${totalPages}`}
           />
           <button type="submit" className="page-input-btn">Go</button>
         </form>
@@ -96,11 +98,14 @@ const Pagination: React.FC<PaginationProps> = ({
         className="nav-btn next-btn" 
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
+        aria-label="Next page"
       >
         Next →
       </button>
-    </div>
+    </nav>
   );
-};
+});
+
+Pagination.displayName = 'Pagination';
 
 export default Pagination;

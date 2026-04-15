@@ -20,11 +20,11 @@ async function resetDatabase() {
     console.log('Deleting mock test answers...');
     await client.query('DELETE FROM mock_test_answers');
     
-    console.log('Deleting mock test results...');
-    await client.query('DELETE FROM mock_test_results');
+    console.log('Soft-deleting mock test results...');
+    await client.query('UPDATE mock_test_results SET deleted_at = CURRENT_TIMESTAMP WHERE deleted_at IS NULL');
     
-    console.log('Deleting user progress...');
-    await client.query('DELETE FROM user_progress');
+    console.log('Soft-deleting user progress...');
+    await client.query('UPDATE user_progress SET deleted_at = CURRENT_TIMESTAMP WHERE deleted_at IS NULL');
     
     console.log('Deleting questions...');
     await client.query('DELETE FROM questions');

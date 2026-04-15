@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Question } from '../types';
 import { progressService } from '../services/progressService';
+import { bookmarkService } from '../services/bookmarkService';
+import { apiClient } from '../services/api';
 import Discussions from './Discussions';
 import Pagination from './Pagination';
 import { usePaginationScroll } from '../hooks/useScrollManagement';
+import { QUESTIONS_PER_PAGE } from '../constants';
+import { Target, Save, Bookmark, BookmarkPlus, ImageOff, Check, X, MessageCircle, RotateCcw } from 'lucide-react';
 import './StudyMode.css';
 
 interface StudyModeProps {
@@ -48,16 +52,18 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
   const [questionStartTimes, setQuestionStartTimes] = useState<Record<number, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [error, setError] = useState<string>('');
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   
   // Scroll management for pagination
   const { handlePageChange } = usePaginationScroll();
   
-  const questionsPerPage = 10;
-  const totalPages = Math.ceil(questions.length / questionsPerPage);
+  const questionsPerPage = QUESTIONS_PER_PAGE;
+  const totalPages = useMemo(() => Math.ceil(questions.length / questionsPerPage), [questions.length]);
   const startIndex = (currentPage - 1) * questionsPerPage;
   const endIndex = startIndex + questionsPerPage;
-  const currentQuestions = questions.slice(startIndex, endIndex);
+  const currentQuestions = useMemo(() => questions.slice(startIndex, endIndex), [questions, startIndex, endIndex]);
 
   // Load existing progress on component mount
   useEffect(() => {
@@ -97,6 +103,37 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
     loadProgress();
   }, [testId, questions]);
 
+  // Load bookmarks for this test
+  useEffect(() => {
+    bookmarkService.getBookmarks(testId).then(bookmarks => {
+      setBookmarkedIds(new Set(bookmarks.map(b => b.questionId)));
+    }).catch(() => {});
+  }, [testId]);
+
+  const handleToggleBookmark = useCallback(async (questionId: string) => {
+    const wasBookmarked = bookmarkedIds.has(questionId);
+    setBookmarkedIds(prev => {
+      const next = new Set(prev);
+      if (wasBookmarked) next.delete(questionId);
+      else next.add(questionId);
+      return next;
+    });
+    try {
+      if (wasBookmarked) {
+        await bookmarkService.removeBookmark(questionId);
+      } else {
+        await bookmarkService.addBookmark(questionId);
+      }
+    } catch {
+      setBookmarkedIds(prev => {
+        const next = new Set(prev);
+        if (wasBookmarked) next.add(questionId);
+        else next.delete(questionId);
+        return next;
+      });
+    }
+  }, [bookmarkedIds]);
+
   // Function to render text with images or placeholders
   const renderTextWithImages = (text: string, images: string[] = []) => {
     const parts = text.split('//IMG//');
@@ -135,7 +172,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
         } else {
           result.push(
             <div key={`placeholder-${index}`} className="missing-image">
-              <p>📷 Image placeholder - Image not available in dataset</p>
+              <p>Image placeholder - Image not available in dataset</p>
             </div>
           );
         }
@@ -205,6 +242,23 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
       // Don't show error to user, just log it
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleResetProgress = async () => {
+    if (!window.confirm('Are you sure you want to reset all study progress for this test? This cannot be undone.')) return;
+    setIsResetting(true);
+    try {
+      await apiClient.delete(`/progress/study/${testId}`);
+      setAnsweredQuestions(new Set());
+      setSelectedAnswers({});
+      setProgress({});
+      setQuestionStartTimes({});
+      setError('');
+    } catch (err: any) {
+      setError('Failed to reset progress. Please try again.');
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -294,18 +348,18 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
     return 'choice';
   };
 
-  const goToPage = (page: number) => {
+  const goToPage = useCallback((page: number) => {
     handlePageChange(() => {
       setCurrentPage(page);
       setPageInput(''); // Clear input when navigating
     });
-  };
+  }, [handlePageChange]);
 
-  const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePageInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setPageInput(e.target.value);
-  };
+  }, []);
 
-  const handlePageInputSubmit = (e: React.FormEvent) => {
+  const handlePageInputSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     const page = parseInt(pageInput);
     if (page >= 1 && page <= totalPages) {
@@ -313,7 +367,9 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
     } else {
       setPageInput(''); // Clear invalid input
     }
-  };
+  }, [pageInput, totalPages, goToPage]);
+
+  const handlePageInputValueChange = useCallback((value: string) => setPageInput(value), []);
 
   // Pagination component props
   const paginationProps = {
@@ -321,17 +377,17 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
     totalPages,
     onPageChange: goToPage,
     pageInput,
-    onPageInputChange: (value: string) => setPageInput(value),
+    onPageInputChange: handlePageInputValueChange,
     onPageInputSubmit: handlePageInputSubmit
   };
 
-  const getStudyStats = () => {
+  const stats = useMemo(() => {
     const totalStudied = answeredQuestions.size;
     const correctCount = Array.from(answeredQuestions).filter(index => isCorrect(index)).length;
     const accuracy = totalStudied > 0 ? Math.round((correctCount / totalStudied) * 100) : 0;
     
     return { totalStudied, correctCount, accuracy };
-  };
+  }, [answeredQuestions, selectedAnswers, questions]);
 
   if (isLoading) {
     return (
@@ -341,16 +397,23 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
     );
   }
 
-  const stats = getStudyStats();
-
   return (
     <div className="study-mode" id="study-mode-container">
       <div className="study-header">
-        <h2>🎯 {testName} - Study Mode</h2>
+        <h2><Target size={20} style={{verticalAlign: 'middle', marginRight: 4}} /> {testName} - Study Mode</h2>
+        <button
+          className="reset-progress-btn"
+          onClick={handleResetProgress}
+          disabled={isResetting || stats.totalStudied === 0}
+          title="Reset all study progress for this test"
+        >
+          <RotateCcw size={14} style={{verticalAlign: 'middle', marginRight: 4}} />
+          {isResetting ? 'Resetting...' : 'Reset Progress'}
+        </button>
         <div className="study-progress-bar">
           <div className="progress-info">
             <span>{stats.totalStudied} studied • {stats.correctCount} correct • {stats.accuracy}% accuracy</span>
-            {isSaving && <span className="saving-indicator">💾 Saving...</span>}
+            {isSaving && <span className="saving-indicator"><Save size={12} style={{verticalAlign: 'middle', marginRight: 2}} /> Saving...</span>}
           </div>
           <div className="progress-bar-container">
             <div 
@@ -392,7 +455,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
               <div key={question.question_id} className="study-question">
                 <div className="question-header">
                   <h3>Question {question.question_number}</h3>
-                  <span className="result-indicator incorrect">📷 Image-Based</span>
+                  <span className="result-indicator incorrect"><ImageOff size={12} style={{verticalAlign: 'middle', marginRight: 2}} /> Image-Based</span>
                 </div>
                 
                 <div className="question-text">
@@ -415,7 +478,17 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
           return (
             <div key={question.question_id} className="study-question">
               <div className="question-header">
-                <h3>Question {question.question_number}</h3>
+                <div className="question-header-left">
+                  <h3>Question {question.question_number}</h3>
+                  <button
+                    className={`bookmark-btn ${bookmarkedIds.has(question.question_id) ? 'bookmarked' : ''}`}
+                    onClick={() => handleToggleBookmark(question.question_id)}
+                    aria-label={bookmarkedIds.has(question.question_id) ? 'Remove bookmark' : 'Add bookmark'}
+                    title={bookmarkedIds.has(question.question_id) ? 'Remove bookmark' : 'Bookmark this question'}
+                  >
+                    {bookmarkedIds.has(question.question_id) ? <Bookmark size={14} /> : <BookmarkPlus size={14} />}
+                  </button>
+                </div>
                 <div className="question-header-actions">
                   {isMultipleAnswer && (
                     <span className="multiple-indicator">Multiple Answers</span>
@@ -423,14 +496,14 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
                   {isAnswered && (
                     <>
                       <span className={`result-indicator ${isCorrect(questionIndex) ? 'correct' : 'incorrect'}`}>
-                        {isCorrect(questionIndex) ? '✓ Correct' : '✗ Incorrect'}
+                        {isCorrect(questionIndex) ? <><Check size={12} /> Correct</> : <><X size={12} /> Incorrect</>}
                       </span>
                       {question.discussion && question.discussion.length > 0 && (
                         <button 
                           className="discussions-btn"
                           onClick={() => setShowDiscussions(questionIndex)}
                         >
-                          💬 Discussions {question.discussion_count && `(${question.discussion_count})`}
+                          <MessageCircle size={12} style={{verticalAlign: 'middle', marginRight: 4}} /> Discussions {question.discussion_count && `(${question.discussion_count})`}
                         </button>
                       )}
                     </>
@@ -448,6 +521,9 @@ const StudyMode: React.FC<StudyModeProps> = ({ questions, testName, testId }) =>
                     key={key}
                     className={getChoiceClass(questionIndex, key)}
                     onClick={() => !isAnswered && handleAnswerClick(questionIndex, key)}
+                    role="button"
+                    tabIndex={isAnswered ? -1 : 0}
+                    onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !isAnswered) { e.preventDefault(); handleAnswerClick(questionIndex, key); } }}
                   >
                     <span className="choice-label">{key}</span>
                     <span className="choice-text">

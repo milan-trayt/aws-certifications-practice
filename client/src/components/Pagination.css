@@ -3,10 +3,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
+  background: var(--color-card-bg);
   padding: 16px 20px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   margin-bottom: 16px;
 }
 
@@ -20,7 +20,7 @@
 }
 
 .nav-btn {
-  background: #6b7280;
+  background: var(--color-text-secondary);
   color: white;
   border: none;
   padding: 10px 16px;
@@ -32,7 +32,7 @@
 }
 
 .nav-btn:hover:not(:disabled) {
-  background: #4b5563;
+  background: var(--color-text-primary);
   transform: translateY(-1px);
 }
 
@@ -58,20 +58,22 @@
 .page-input {
   width: 100px;
   padding: 6px 8px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   font-size: 12px;
   text-align: center;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
 }
 
 .page-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .page-input-btn {
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
   border: none;
   padding: 6px 10px;
@@ -83,13 +85,13 @@
 }
 
 .page-input-btn:hover {
-  background: #2563eb;
+  background: var(--color-accent-hover);
 }
 
 .page-btn {
   background: transparent;
-  color: #3b82f6;
-  border: 1px solid #d1d5db;
+  color: var(--color-accent);
+  border: 1px solid var(--color-border);
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
@@ -100,19 +102,19 @@
 }
 
 .page-btn:hover {
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
-  border-color: #3b82f6;
+  border-color: var(--color-accent);
 }
 
 .page-btn.active {
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
-  border-color: #3b82f6;
+  border-color: var(--color-accent);
 }
 
 .ellipsis {
-  color: #6b7280;
+  color: var(--color-text-secondary);
   padding: 0 6px;
   font-weight: 500;
 }

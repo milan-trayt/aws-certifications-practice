@@ -1,27 +1,26 @@
 .practice-mode {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 20px clamp(16px, 3vw, 48px);
+  width: 100%;
 }
 
 .practice-header {
-  background: white;
+  background: var(--color-card-bg);
   padding: 16px 20px;
   border-radius: 8px;
   margin-bottom: 16px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   text-align: center;
 }
 
 .practice-header h2 {
-  color: #1f2937;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
   font-size: 1.5rem;
   font-weight: 600;
 }
 
 .page-info {
-  color: #6b7280;
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 
@@ -33,10 +32,10 @@
 }
 
 .practice-question {
-  background: white;
+  background: var(--color-card-bg);
   padding: 20px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
 }
 
 .question-header {
@@ -44,14 +43,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--color-border-light);
   padding-bottom: 12px;
   flex-wrap: wrap;
   gap: 8px;
 }
 
 .question-header h3 {
-  color: #1f2937;
+  color: var(--color-text-primary);
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
@@ -62,6 +61,40 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.question-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.practice-mode .bookmark-btn,
+.study-mode .bookmark-btn {
+  background: none;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 3px 7px;
+  transition: all 0.2s ease;
+  line-height: 1;
+  color: var(--color-text-secondary);
+}
+
+.practice-mode .bookmark-btn:hover,
+.study-mode .bookmark-btn:hover {
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
+  color: var(--color-accent);
+  transform: scale(1.1);
+}
+
+.practice-mode .bookmark-btn.bookmarked,
+.study-mode .bookmark-btn.bookmarked {
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
+  color: var(--color-accent);
 }
 
 .discussions-btn {
@@ -113,7 +146,7 @@
 .question-text {
   margin-bottom: 16px;
   line-height: 1.5;
-  color: #374151;
+  color: var(--color-text-primary);
   font-size: 15px;
 }
 
@@ -150,7 +183,7 @@
 
 .answer-images h4 {
   margin: 0 0 12px 0;
-  color: #374151;
+  color: var(--color-text-primary);
   font-size: 14px;
   font-weight: 600;
 }
@@ -181,50 +214,50 @@
   align-items: flex-start;
   padding: 12px;
   margin-bottom: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: white;
+  background: var(--color-card-bg);
   gap: 10px;
 }
 
 .choice-label {
   font-weight: 600;
   font-size: 14px;
-  color: #3b82f6;
+  color: var(--color-accent);
   min-width: 20px;
   flex-shrink: 0;
   padding-top: 2px;
 }
 
 .choice:hover:not(.correct):not(.incorrect):not(.correct-highlight) {
-  border-color: #3b82f6;
-  background: #f8fafc;
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
   transform: translateY(-1px);
 }
 
 .choice.selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
 }
 
 .choice.correct {
-  border-color: #10b981;
+  border-color: var(--color-success);
   background: #ecfdf5;
   color: #065f46;
   cursor: default;
 }
 
 .choice.incorrect {
-  border-color: #ef4444;
+  border-color: var(--color-danger);
   background: #fef2f2;
   color: #991b1b;
   cursor: default;
 }
 
 .choice.correct-highlight {
-  border-color: #10b981;
+  border-color: var(--color-success);
   background: #ecfdf5;
   color: #065f46;
   cursor: default;
@@ -234,10 +267,11 @@
   flex: 1;
   line-height: 1.4;
   font-size: 14px;
+  color: var(--color-text-primary);
 }
 
 .submit-btn {
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -253,18 +287,18 @@
 }
 
 .submit-btn:hover {
-  background: #2563eb;
+  background: var(--color-accent-hover);
   transform: translateY(-1px);
 }
 
 .answer-explanation {
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid var(--color-border-light);
   padding-top: 12px;
   margin-top: 12px;
 }
 
 .correct-answer {
-  color: #10b981;
+  color: var(--color-success);
   font-size: 14px;
   text-align: center;
   font-weight: 500;
@@ -274,10 +308,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
+  background: var(--color-card-bg);
   padding: 16px 20px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   margin-bottom: 16px;
 }
 
@@ -291,7 +325,7 @@
 }
 
 .nav-btn {
-  background: #6b7280;
+  background: var(--color-text-secondary);
   color: white;
   border: none;
   padding: 10px 16px;
@@ -303,7 +337,7 @@
 }
 
 .nav-btn:hover:not(:disabled) {
-  background: #4b5563;
+  background: var(--color-text-primary);
   transform: translateY(-1px);
 }
 
@@ -329,20 +363,22 @@
 .page-input {
   width: 100px;
   padding: 6px 8px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   font-size: 12px;
   text-align: center;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
 }
 
 .page-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 .page-input-btn {
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
   border: none;
   padding: 6px 10px;
@@ -354,13 +390,13 @@
 }
 
 .page-input-btn:hover {
-  background: #2563eb;
+  background: var(--color-accent-hover);
 }
 
 .page-btn {
   background: transparent;
-  color: #3b82f6;
-  border: 1px solid #d1d5db;
+  color: var(--color-accent);
+  border: 1px solid var(--color-border);
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
@@ -371,19 +407,19 @@
 }
 
 .page-btn:hover {
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
-  border-color: #3b82f6;
+  border-color: var(--color-accent);
 }
 
 .page-btn.active {
-  background: #3b82f6;
+  background: var(--color-accent);
   color: white;
-  border-color: #3b82f6;
+  border-color: var(--color-accent);
 }
 
 .ellipsis {
-  color: #6b7280;
+  color: var(--color-text-secondary);
   padding: 0 6px;
   font-weight: 500;
 }

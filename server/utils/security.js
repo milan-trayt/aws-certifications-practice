@@ -237,13 +237,18 @@ const sanitizeJsonData = (jsonData) => {
 
 /**
  * Generate Content Security Policy header value
+ * @param {string} [nonce] - Optional nonce for style-src
  * @returns {string} CSP header value
  */
-const generateCSPHeader = () => {
+const generateCSPHeader = (nonce) => {
+  const styleSrc = nonce
+    ? `style-src 'self' 'nonce-${nonce}'`
+    : "style-src 'self'";
+
   return [
     "default-src 'self'",
     "script-src 'self'",
-    "style-src 'self' 'unsafe-inline'", // Allow inline styles for React
+    styleSrc,
     "img-src 'self' data: https:",
     "font-src 'self'",
     "connect-src 'self'",

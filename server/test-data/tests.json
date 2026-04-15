@@ -8,8 +8,8 @@
       "difficulty": "Associate",
       "filename": "aws-saa-c03.json",
       "totalQuestions": 1019,
-      "timeLimit": 120,
-      "passingScore": 72
+      "timeLimit": 130,
+      "passingScore": 720
     },
     {
       "id": "aws-dva-c02",
@@ -19,8 +19,8 @@
       "difficulty": "Associate",
       "filename": "aws-dva-c02.json",
       "totalQuestions": 555,
-      "timeLimit": 120,
-      "passingScore": 72
+      "timeLimit": 130,
+      "passingScore": 720
     },
     {
       "id": "aws-dop-c02",
@@ -30,8 +30,8 @@
       "difficulty": "Professional",
       "filename": "aws-dop-c02.json",
       "totalQuestions": 363,
-      "timeLimit": 120,
-      "passingScore": 75
+      "timeLimit": 180,
+      "passingScore": 750
     },
     {
       "id": "aws-sap-c02",
@@ -41,8 +41,8 @@
       "difficulty": "Professional",
       "filename": "aws-sap-c02.json",
       "totalQuestions": 529,
-      "timeLimit": 120,
-      "passingScore": 75
+      "timeLimit": 180,
+      "passingScore": 750
     },
     {
       "id": "aws-aif-c01",
@@ -53,7 +53,7 @@
       "filename": "aws-aif-c01.json",
       "totalQuestions": 233,
       "timeLimit": 90,
-      "passingScore": 70
+      "passingScore": 700
     },
     {
       "id": "aws-clf-c02",
@@ -64,18 +64,18 @@
       "filename": "aws-clf-c02.json",
       "totalQuestions": 718,
       "timeLimit": 90,
-      "passingScore": 70
+      "passingScore": 700
     },
     {
       "id": "aws-mla-c01",
-      "name": "AWS Certified Machine Learning Engineer  (MLA-C01)",
+      "name": "AWS Certified Machine Learning Engineer (MLA-C01)",
       "description": "AWS Certified Machine Learning Engineer exam practice questions",
       "category": "AWS",
       "difficulty": "Associate",
       "filename": "aws-mla-c01.json",
       "totalQuestions": 113,
-      "timeLimit": 90,
-      "passingScore": 70
+      "timeLimit": 130,
+      "passingScore": 720
     }
   ]
 }

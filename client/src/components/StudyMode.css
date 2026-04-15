@@ -1,26 +1,54 @@
 /* Modern Study Mode Styles */
 .study-mode {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 20px clamp(16px, 3vw, 48px);
+  width: 100%;
 }
 
 .study-header {
-  background: white;
-  border: 1px solid #e1e8ed;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 24px;
   margin-bottom: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
 .study-header h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--color-text-primary);
   margin-bottom: 16px;
 }
 
+.reset-progress-btn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.reset-progress-btn:hover:not(:disabled) {
+  background: var(--color-danger);
+  color: white;
+}
+
+.reset-progress-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .study-progress-bar {
+  width: 100%;
   margin-bottom: 16px;
 }
 
@@ -30,12 +58,12 @@
   align-items: center;
   margin-bottom: 12px;
   font-size: 0.9rem;
-  color: #7f8c8d;
+  color: var(--color-text-secondary);
 }
 
 .saving-indicator {
   background: #e8f5e8;
-  color: #27ae60;
+  color: var(--color-success);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -46,14 +74,14 @@
 
 .progress-bar-container {
   position: relative;
-  background: #f1f3f4;
+  background: var(--color-border-light);
   border-radius: 8px;
   height: 8px;
   overflow: hidden;
 }
 
 .progress-bar-fill {
-  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  background: linear-gradient(90deg, var(--color-success), #2ecc71);
   height: 100%;
   border-radius: 8px;
   transition: width 0.3s ease;
@@ -66,12 +94,12 @@
   right: 0;
   font-size: 0.8rem;
   font-weight: 500;
-  color: #7f8c8d;
+  color: var(--color-text-secondary);
 }
 
 .page-info {
   font-size: 0.85rem;
-  color: #95a5a6;
+  color: var(--color-text-muted);
 }
 
 .questions-list {
@@ -81,16 +109,16 @@
 }
 
 .study-question {
-  background: white;
-  border: 1px solid #e1e8ed;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 24px;
   transition: all 0.2s ease;
 }
 
 .study-question:hover {
-  border-color: #d1d9e0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-color: var(--color-border);
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 .question-header {
@@ -105,7 +133,7 @@
 .question-header h3 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--color-text-primary);
 }
 
 .question-header-actions {
@@ -116,8 +144,8 @@
 }
 
 .multiple-indicator {
-  background: #fff3cd;
-  color: #856404;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -135,16 +163,16 @@
 
 .result-indicator.correct {
   background: #e8f5e8;
-  color: #27ae60;
+  color: var(--color-success);
 }
 
 .result-indicator.incorrect {
   background: #fdeaea;
-  color: #e74c3c;
+  color: var(--color-danger);
 }
 
 .discussions-btn {
-  background: #3498db;
+  background: var(--color-accent);
   color: white;
   border: none;
   padding: 6px 12px;
@@ -156,18 +184,18 @@
 }
 
 .discussions-btn:hover {
-  background: #2980b9;
+  background: var(--color-accent-hover);
 }
 
 .question-text {
   font-size: 1rem;
   line-height: 1.6;
-  color: #2c3e50;
+  color: var(--color-text-primary);
   margin-bottom: 20px;
   padding: 16px;
-  background: #f8f9fa;
+  background: var(--color-bg-tertiary);
   border-radius: 6px;
-  border-left: 3px solid #3498db;
+  border-left: 3px solid var(--color-accent);
 }
 
 .question-image-container {
@@ -179,27 +207,27 @@
   max-width: 100%;
   height: auto;
   border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 .missing-image {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
   border-radius: 6px;
   padding: 12px;
   margin: 8px 0;
   text-align: center;
-  color: #856404;
+  color: var(--color-warning-text);
   font-size: 0.9rem;
 }
 
 .question-error {
-  background: #fdeaea;
+  background: var(--color-error-bg);
   border: 1px solid #f5c6cb;
   border-radius: 6px;
   padding: 16px;
   margin: 12px 0;
-  color: #721c24;
+  color: var(--color-error-text);
 }
 
 .choices {
@@ -213,35 +241,35 @@
   align-items: flex-start;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #e1e8ed;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: white;
+  background: var(--color-card-bg);
 }
 
 .choice:hover {
-  border-color: #3498db;
-  background: #f8fbff;
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
 }
 
 .choice.selected {
-  border-color: #3498db;
-  background: #e3f2fd;
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
 }
 
 .choice.correct {
-  border-color: #27ae60;
+  border-color: var(--color-success);
   background: #e8f5e8;
 }
 
 .choice.incorrect {
-  border-color: #e74c3c;
+  border-color: var(--color-danger);
   background: #fdeaea;
 }
 
 .choice.correct-highlight {
-  border-color: #27ae60;
+  border-color: var(--color-success);
   background: #e8f5e8;
   animation: highlight 1s ease-out;
 }
@@ -254,10 +282,10 @@
 
 .choice-label {
   font-weight: 600;
-  color: #7f8c8d;
+  color: var(--color-text-secondary);
   min-width: 20px;
   text-align: center;
-  background: #f1f3f4;
+  background: var(--color-border-light);
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -270,28 +298,28 @@
 
 .choice.correct .choice-label,
 .choice.correct-highlight .choice-label {
-  background: #27ae60;
+  background: var(--color-success);
   color: white;
 }
 
 .choice.incorrect .choice-label {
-  background: #e74c3c;
+  background: var(--color-danger);
   color: white;
 }
 
 .choice.selected .choice-label {
-  background: #3498db;
+  background: var(--color-accent);
   color: white;
 }
 
 .choice-text {
   flex: 1;
   line-height: 1.5;
-  color: #2c3e50;
+  color: var(--color-text-primary);
 }
 
 .submit-btn {
-  background: #3498db;
+  background: var(--color-accent);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -304,7 +332,7 @@
 }
 
 .submit-btn:hover {
-  background: #2980b9;
+  background: var(--color-accent-hover);
 }
 
 /* Pagination */
@@ -314,8 +342,8 @@
   align-items: center;
   margin-top: 32px;
   padding: 20px;
-  background: white;
-  border: 1px solid #e1e8ed;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   flex-wrap: wrap;
   gap: 16px;
@@ -331,7 +359,7 @@
 }
 
 .nav-btn {
-  background: #7f8c8d;
+  background: var(--color-text-secondary);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -345,11 +373,11 @@
 }
 
 .nav-btn:hover:not(:disabled) {
-  background: #6c7b7d;
+  background: var(--color-text-primary);
 }
 
 .nav-btn:disabled {
-  background: #bdc3c7;
+  background: var(--color-text-muted);
   cursor: not-allowed;
 }
 
@@ -361,9 +389,9 @@
 }
 
 .page-btn {
-  background: white;
-  color: #7f8c8d;
-  border: 1px solid #e1e8ed;
+  background: var(--color-card-bg);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
   padding: 6px 10px;
   border-radius: 4px;
   cursor: pointer;
@@ -374,18 +402,18 @@
 }
 
 .page-btn:hover {
-  border-color: #3498db;
-  color: #3498db;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .page-btn.active {
-  background: #3498db;
+  background: var(--color-accent);
   color: white;
-  border-color: #3498db;
+  border-color: var(--color-accent);
 }
 
 .ellipsis {
-  color: #bdc3c7;
+  color: var(--color-text-muted);
   padding: 6px 4px;
 }
 
@@ -399,19 +427,21 @@
 .page-input {
   width: 140px;
   padding: 6px 10px;
-  border: 1px solid #e1e8ed;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 0.9rem;
   transition: border-color 0.2s ease;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
 }
 
 .page-input:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: var(--color-accent);
 }
 
 .page-input-btn {
-  background: #27ae60;
+  background: var(--color-success);
   color: white;
   border: none;
   padding: 6px 12px;
@@ -427,90 +457,26 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .study-mode {
-    padding: 15px;
-  }
-  
-  .study-header {
-    padding: 20px;
-  }
-  
-  .study-question {
-    padding: 20px;
-  }
-  
-  .question-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-  
-  .question-header-actions {
-    justify-content: center;
-  }
-  
-  .choice {
-    padding: 10px;
-  }
+  .study-mode { padding: 15px; }
+  .study-header { padding: 20px; }
+  .study-question { padding: 20px; }
+  .question-header { flex-direction: column; align-items: stretch; gap: 8px; }
+  .question-header-actions { justify-content: center; }
+  .choice { padding: 10px; }
 }
 
 @media (max-width: 480px) {
-  .study-mode {
-    padding: 10px;
-  }
-  
-  .study-header {
-    padding: 16px;
-  }
-  
-  .study-header h2 {
-    font-size: 1.3rem;
-  }
-  
-  .progress-info {
-    font-size: 0.8rem;
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-start;
-  }
-  
-  .saving-indicator {
-    font-size: 0.7rem;
-  }
-  
-  .page-info {
-    font-size: 0.8rem;
-  }
-  
-  .study-question {
-    padding: 16px;
-  }
-  
-  .question-header h3 {
-    font-size: 1rem;
-  }
-  
-  .question-text {
-    font-size: 0.9rem;
-    padding: 12px;
-  }
-  
-  .choice {
-    padding: 8px;
-  }
-  
-  .choice-label {
-    width: 20px;
-    height: 20px;
-    font-size: 0.8rem;
-  }
-  
-  .choice-text {
-    font-size: 0.9rem;
-  }
-  
-  .submit-btn {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
+  .study-mode { padding: 10px; }
+  .study-header { padding: 16px; }
+  .study-header h2 { font-size: 1.3rem; }
+  .progress-info { font-size: 0.8rem; flex-direction: column; gap: 4px; align-items: flex-start; }
+  .saving-indicator { font-size: 0.7rem; }
+  .page-info { font-size: 0.8rem; }
+  .study-question { padding: 16px; }
+  .question-header h3 { font-size: 1rem; }
+  .question-text { font-size: 0.9rem; padding: 12px; }
+  .choice { padding: 8px; }
+  .choice-label { width: 20px; height: 20px; font-size: 0.8rem; }
+  .choice-text { font-size: 0.9rem; }
+  .submit-btn { padding: 8px 16px; font-size: 13px; }
 }

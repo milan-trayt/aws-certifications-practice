@@ -1,0 +1,267 @@
+.bookmarked-questions {
+  padding: 20px clamp(16px, 3vw, 48px);
+  width: 100%;
+}
+
+.bookmarks-header {
+  background: var(--color-card-bg);
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bookmarks-header h2 {
+  color: var(--color-text-primary);
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.bookmarks-count {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  background: var(--color-bg-tertiary);
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.bookmarks-empty {
+  background: var(--color-card-bg);
+  padding: 40px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.bookmarks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bookmark-item {
+  background: var(--color-card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  transition: box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.bookmark-item:hover {
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.bookmark-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bookmark-item-header:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.bookmark-question-number {
+  font-weight: 600;
+  color: var(--color-accent);
+  background: var(--color-bg-tertiary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.bookmark-question-preview {
+  flex: 1;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookmark-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.bookmark-remove-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 4px 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.bookmark-remove-btn:hover {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+/* Expanded content */
+.bookmark-expanded-content {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.bookmark-full-question {
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  padding: 16px;
+  background: var(--color-bg-tertiary);
+  border-radius: 6px;
+  margin-top: 12px;
+  border-left: 3px solid var(--color-accent);
+}
+
+.bookmark-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.bookmark-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-card-bg);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+}
+
+.bookmark-choice.correct {
+  border-color: var(--color-success);
+  background: rgba(39, 174, 96, 0.08);
+}
+
+.bookmark-choice-key {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 20px;
+  flex-shrink: 0;
+}
+
+.bookmark-choice.correct .bookmark-choice-key {
+  color: var(--color-success);
+}
+
+.bookmark-choice-value {
+  flex: 1;
+}
+
+.bookmark-correct-icon {
+  color: var(--color-success);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.bookmark-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.bookmark-reveal-btn {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.bookmark-reveal-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.bookmark-discussions-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.bookmark-discussions-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.bookmark-date {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+
+.bm-image-container {
+  margin: 8px 0;
+}
+
+.bm-image {
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+.bm-missing-image {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  padding: 8px;
+  background: var(--color-bg-tertiary);
+  border-radius: 4px;
+  text-align: center;
+  margin: 8px 0;
+}
+
+@media (max-width: 768px) {
+  .bookmarks-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bookmark-question-preview {
+    display: none;
+  }
+
+  .bookmark-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bookmark-date {
+    margin-left: 0;
+  }
+}
