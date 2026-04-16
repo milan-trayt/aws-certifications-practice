@@ -32,7 +32,6 @@ function getVerifier() {
 
 /**
  * Extract Bearer token from Authorization header.
- * Returns the token string or null if not present/invalid format.
  */
 function extractBearerToken(req) {
   const authHeader = req.header('Authorization');
@@ -47,7 +46,7 @@ function extractBearerToken(req) {
  * Verify token and look up local user.
  * Returns { user, error } — one of them will be set.
  */
-async function verifyAndLookupUser(token, db) {
+async function verifyAndLookupUser(token, db, req) {
   let payload;
   try {
     payload = await getVerifier().verify(token);
@@ -60,6 +59,10 @@ async function verifyAndLookupUser(token, db) {
 
   const cognitoSub = payload.sub;
   const email = payload.email || payload.username || null;
+  // Also check headers sent by the client (from ID token)
+  const headerEmail = req?.headers?.['x-user-email'] || null;
+  const headerFirstName = req?.headers?.['x-user-given-name'] || null;
+  const headerLastName = req?.headers?.['x-user-family-name'] || null;
 
   try {
     // First try lookup by cognito_sub
@@ -85,12 +88,21 @@ async function verifyAndLookupUser(token, db) {
         console.log(`Auto-linked user ${email} to cognito_sub ${cognitoSub}`);
         result = emailResult;
       } else if (emailResult.rows.length === 0) {
-        // No user exists at all — create one (password_hash not needed for Cognito users)
+        // No user exists — use email from X-User-Email header (sent by client from ID token)
+        const realEmail = headerEmail || email;
+
+        if (!realEmail || realEmail === cognitoSub) {
+          return {
+            user: null,
+            error: { code: 'INVALID_TOKEN', message: 'Could not determine user email.' },
+          };
+        }
+
         const insertResult = await db.query(
-          `INSERT INTO users (email, cognito_sub, password_hash) VALUES ($1, $2, $3) RETURNING id, email, cognito_sub`,
-          [email, cognitoSub, 'cognito-managed']
+          `INSERT INTO users (email, cognito_sub, password_hash, first_name, last_name) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, cognito_sub`,
+          [realEmail, cognitoSub, 'cognito-managed', headerFirstName || null, headerLastName || null]
         );
-        console.log(`Auto-created user ${email} with cognito_sub ${cognitoSub}`);
+        console.log(`Auto-created user ${realEmail} with cognito_sub ${cognitoSub}`);
         result = insertResult;
       }
     }
@@ -150,7 +162,7 @@ const cognitoAuthMiddleware = async (req, res, next) => {
   }
 
   const db = req.app.locals.db;
-  const { user, error } = await verifyAndLookupUser(token, db);
+  const { user, error } = await verifyAndLookupUser(token, db, req);
 
   if (error) {
     return res.status(401).json({
@@ -177,7 +189,7 @@ const optionalCognitoAuth = async (req, res, next) => {
   }
 
   const db = req.app.locals.db;
-  const { user } = await verifyAndLookupUser(token, db);
+  const { user } = await verifyAndLookupUser(token, db, req);
 
   req.user = user || null;
   next();

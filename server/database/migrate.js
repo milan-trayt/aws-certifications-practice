@@ -6,7 +6,7 @@ const { Pool } = require('pg');
 // Database connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/aws_practice',
-  ssl: process.env.NODE_ENV === 'production' ? {
+  ssl: process.env.DB_SSL === 'true' ? {
     rejectUnauthorized: false // For AWS RDS with self-signed certificates
   } : false
 });

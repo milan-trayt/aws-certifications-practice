@@ -66,6 +66,13 @@ api.interceptors.request.use(
     const session = cognitoService.getCurrentSession();
     if (session) {
       config.headers.Authorization = `Bearer ${session.accessToken}`;
+      // Send ID token claims so server can use them for auto-create
+      try {
+        const payload = JSON.parse(atob(session.idToken.split('.')[1]));
+        config.headers['X-User-Email'] = payload.email || '';
+        config.headers['X-User-Given-Name'] = payload.given_name || '';
+        config.headers['X-User-Family-Name'] = payload.family_name || '';
+      } catch { /* ignore */ }
     }
 
     // Attach CSRF token on mutating requests

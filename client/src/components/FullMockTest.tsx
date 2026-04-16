@@ -50,11 +50,11 @@ const FullMockTest: React.FC = () => {
   const [isSavingResults, setIsSavingResults] = useState(false);
   const [reviewFilter, setReviewFilter] = useState<'all' | 'incomplete' | 'flagged'>('all');
   const [loadError, setLoadError] = useState('');
+  const [colorScheme, setColorScheme] = useState('pv-scheme-black-on-white');
+  const [cameFromReview, setCameFromReview] = useState(false);
 
-  // Get testId from URL
   const testId = window.location.pathname.split('/full-mock/')[1] || '';
 
-  // Load test data
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -75,7 +75,6 @@ const FullMockTest: React.FC = () => {
     if (testId) loadData();
   }, [testId]);
 
-  // Determine question count and time from test metadata
   const getExamConfig = useCallback(() => {
     if (!testMeta) return { questionCount: 65, timeLimitSec: 130 * 60, passingScore: PASSING_SCORE_DEFAULT };
     const qCount = Math.min(testMeta.totalQuestions, allQuestions.length);
@@ -107,7 +106,6 @@ const FullMockTest: React.FC = () => {
     return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} minutes`;
   };
 
-  // Warn on page unload during active test
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
       if (phase === 'active' || phase === 'review-screen') {
@@ -119,7 +117,6 @@ const FullMockTest: React.FC = () => {
     return () => window.removeEventListener('beforeunload', handler);
   }, [phase]);
 
-  // Timer
   useEffect(() => {
     if (phase !== 'active' && phase !== 'review-screen') return;
     if (timeLeft <= 0) { completeTest(); return; }
@@ -138,8 +135,9 @@ const FullMockTest: React.FC = () => {
     selected.forEach((q, i) => {
       const entries = Object.entries(q.choices)
         .filter(([, v]) => v.trim().length > 0)
+        .sort(([a], [b]) => a.localeCompare(b))
         .map(([k, v]) => ({ key: k, value: v }));
-      choicesMap[i] = shuffleArray(entries);
+      choicesMap[i] = entries;
     });
     setShuffledChoicesMap(choicesMap);
     setCurrentQuestionIndex(0);
@@ -175,7 +173,10 @@ const FullMockTest: React.FC = () => {
   const goToQuestion = (idx: number) => {
     if (idx >= 0 && idx < testQuestions.length) {
       setCurrentQuestionIndex(idx);
-      if (phase === 'review-screen') setPhase('active');
+      if (phase === 'review-screen') {
+        setCameFromReview(true);
+        setPhase('active');
+      }
     }
   };
 
@@ -259,21 +260,27 @@ const FullMockTest: React.FC = () => {
   // ─── Loading ───
   if (phase === 'loading') {
     return (
-      <div className="pv-fullscreen">
-        <div className="pv-exam">
-          <div className="pv-center-screen">
-            {loadError ? (
-              <div className="pv-load-error">
-                <p>{loadError}</p>
-                <button className="pv-btn pv-btn-secondary" onClick={() => window.close()}>Close Tab</button>
-              </div>
-            ) : (
-              <div className="pv-loading-exam">
-                <div className="pv-loading-spinner" />
-                <p>Loading exam...</p>
-              </div>
-            )}
-          </div>
+      <div className={`pv-fullscreen ${colorScheme}`}>
+        <div className="pv-header">
+          <div className="pv-header-left">Loading...</div>
+          <div className="pv-header-right" />
+        </div>
+        <div className="pv-center-screen">
+          {loadError ? (
+            <div className="pv-load-error">
+              <p>{loadError}</p>
+              <button className="pv-btn pv-btn-secondary" onClick={() => window.close()}>Close Tab</button>
+            </div>
+          ) : (
+            <div className="pv-loading-exam">
+              <div className="pv-loading-spinner" />
+              <p>Loading exam...</p>
+            </div>
+          )}
+        </div>
+        <div className="pv-footer">
+          <div className="pv-footer-left" />
+          <div className="pv-footer-right" />
         </div>
       </div>
     );
@@ -291,6 +298,8 @@ const FullMockTest: React.FC = () => {
         onStart={startExam}
         onCancel={() => window.close()}
         formatTimeLimit={formatTimeLimit}
+        colorScheme={colorScheme}
+        onColorSchemeChange={setColorScheme}
       />
     );
   }
@@ -313,6 +322,8 @@ const FullMockTest: React.FC = () => {
         onGoToQuestion={goToQuestion}
         onReturnToExam={() => setPhase('active')}
         onEndExam={completeTest}
+        colorScheme={colorScheme}
+        onColorSchemeChange={setColorScheme}
       />
     );
   }
@@ -327,6 +338,7 @@ const FullMockTest: React.FC = () => {
         isSavingResults={isSavingResults}
         onReviewAnswers={() => setPhase('detailed-review')}
         onClose={() => window.close()}
+        colorScheme={colorScheme}
       />
     );
   }
@@ -340,6 +352,7 @@ const FullMockTest: React.FC = () => {
         shuffledChoicesMap={shuffledChoicesMap}
         renderTextWithImages={renderTextWithImages}
         onBackToResults={() => setPhase('results')}
+        colorScheme={colorScheme}
       />
     );
   }
@@ -369,6 +382,10 @@ const FullMockTest: React.FC = () => {
       onPrev={goPrev}
       onToggleFlag={toggleFlag}
       onReview={() => setPhase('review-screen')}
+      colorScheme={colorScheme}
+      onColorSchemeChange={setColorScheme}
+      cameFromReview={cameFromReview}
+      onReturnToReview={() => { setCameFromReview(false); setPhase('review-screen'); }}
     />
   );
 };

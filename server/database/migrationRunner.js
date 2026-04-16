@@ -26,7 +26,7 @@ function createPool() {
       process.env.DATABASE_URL ||
       'postgresql://postgres:password@localhost:5432/aws_practice',
     ssl:
-      process.env.NODE_ENV === 'production'
+      process.env.DB_SSL === 'true'
         ? { rejectUnauthorized: false }
         : false,
   });

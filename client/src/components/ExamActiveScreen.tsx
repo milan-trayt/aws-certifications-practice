@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Question } from '../types';
-import { Timer, Flag, ImageOff, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, ListOrdered, FileEdit, Flag, ChevronLeft, ChevronRight } from 'lucide-react';
 import './FullMockTest.css';
 
 interface ShuffledChoice {
@@ -24,7 +24,25 @@ interface ExamActiveScreenProps {
   onPrev: () => void;
   onToggleFlag: () => void;
   onReview: () => void;
+  colorScheme: string;
+  onColorSchemeChange: (scheme: string) => void;
+  cameFromReview?: boolean;
+  onReturnToReview?: () => void;
 }
+
+const COLOR_SCHEMES = [
+  { value: 'pv-scheme-black-on-white', label: 'Black on White' },
+  { value: 'pv-scheme-black-on-light-yellow', label: 'Black on Light Yellow' },
+  { value: 'pv-scheme-black-on-salmon', label: 'Black on Salmon' },
+  { value: 'pv-scheme-black-on-yellow', label: 'Black on Yellow' },
+  { value: 'pv-scheme-blue-on-white', label: 'Blue on White' },
+  { value: 'pv-scheme-blue-on-yellow', label: 'Blue on Yellow' },
+  { value: 'pv-scheme-light-yellow-on-black', label: 'Light Yellow on Black' },
+  { value: 'pv-scheme-white-on-black', label: 'White on Black' },
+  { value: 'pv-scheme-white-on-blue', label: 'White on Blue' },
+  { value: 'pv-scheme-yellow-on-black', label: 'Yellow on Black' },
+  { value: 'pv-scheme-yellow-on-blue', label: 'Yellow on Blue' },
+];
 
 const ExamActiveScreen: React.FC<ExamActiveScreenProps> = ({
   testName,
@@ -42,64 +60,156 @@ const ExamActiveScreen: React.FC<ExamActiveScreenProps> = ({
   onPrev,
   onToggleFlag,
   onReview,
+  colorScheme,
+  onColorSchemeChange,
+  cameFromReview,
+  onReturnToReview,
 }) => {
+  const [showComment, setShowComment] = useState(false);
+  const [comment, setComment] = useState('');
   const correctAnswers = currentQuestion.correct_answer.split('');
   const isMultiple = correctAnswers.length > 1;
 
   return (
-    <div className="pv-fullscreen">
-      <div className="pv-exam">
-        <div className="pv-topbar">
-          <div className="pv-topbar-left">
-            <span className="pv-exam-title">{testName}</span>
-            <span className="pv-question-counter">Question {currentQuestionIndex + 1} of {totalQuestions}</span>
-          </div>
-          <div className="pv-topbar-right">
-            <div className={`pv-timer ${timeLeft < 300 ? 'pv-timer-warning' : ''}`}
-              role="timer" aria-label={`Time remaining: ${formatTime(timeLeft)}`}>
-              <span className="pv-timer-icon" aria-hidden="true"><Timer size={14} /></span> {formatTime(timeLeft)}
-            </div>
-          </div>
-        </div>
-
-        <div className="pv-question-area">
-          <div className="pv-question-content">
-            <div className="pv-question-text">
-              {renderTextWithImages(currentQuestion.question_text, currentQuestion.question_images || [])}
-            </div>
-            {choices.length > 0 ? (
-              <div className="pv-choices">
-                {choices.map(({ key, value }) => (
-                  <div key={key} className={`pv-choice ${selectedAnswers.includes(key) ? 'pv-selected' : ''}`}
-                    onClick={() => onChoiceClick(key)}>
-                    <span className={`pv-choice-indicator ${isMultiple ? 'checkbox' : 'radio'} ${selectedAnswers.includes(key) ? 'checked' : ''}`} />
-                    <span className="pv-choice-key">{key}.</span>
-                    <span className="pv-choice-val">{renderTextWithImages(value, currentQuestion.answer_images || [])}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="pv-no-choices"><p><ImageOff size={14} style={{verticalAlign: 'middle', marginRight: 4}} /> Image-based answer choices not available in the dataset.</p></div>
-            )}
-          </div>
-        </div>
-
-        <div className="pv-bottombar">
-          <div className="pv-bottombar-left">
-            <button className="pv-btn pv-btn-nav" onClick={onPrev} disabled={currentQuestionIndex === 0}><ChevronLeft size={14} /> Previous</button>
-            <button className="pv-btn pv-btn-nav" onClick={onNext} disabled={currentQuestionIndex === totalQuestions - 1}>Next <ChevronRight size={14} /></button>
-          </div>
-          <div className="pv-bottombar-center">
-            <button className={`pv-btn pv-btn-flag ${isFlagged ? 'flagged' : ''}`} onClick={onToggleFlag}
-              aria-label={isFlagged ? 'Remove flag from question' : 'Flag question for review'}>
-              {isFlagged ? <><Flag size={14} /> Flagged</> : <><Flag size={14} /> Flag</>}
-            </button>
-          </div>
-          <div className="pv-bottombar-right">
-            <button className="pv-btn pv-btn-review" onClick={onReview}>Review / End Exam</button>
-          </div>
+    <div className={`pv-fullscreen ${colorScheme}`}>
+      {/* Header */}
+      <div className="pv-header">
+        <div className="pv-header-left">{testName}</div>
+        <div className="pv-header-right-stacked">
+          <span className="pv-header-info-line">
+            <Clock size={14} style={{ verticalAlign: 'middle', marginRight: 2 }} />
+            Time Remaining {formatTime(timeLeft)}
+          </span>
+          <span className="pv-header-info-line">
+            <ListOrdered size={14} style={{ verticalAlign: 'middle', marginRight: 2 }} />
+            Question {currentQuestionIndex + 1} of {totalQuestions}
+          </span>
         </div>
       </div>
+
+      {/* Sub-header */}
+      <div className="pv-subheader">
+        <div className="pv-subheader-left">
+          <button
+            className="pv-subheader-btn"
+            onClick={() => setShowComment(!showComment)}
+          >
+            <FileEdit size={15} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+            Comment
+          </button>
+        </div>
+        <div className="pv-subheader-right">
+          <button
+            className={`pv-tag-for-review ${isFlagged ? 'tagged' : ''}`}
+            onClick={onToggleFlag}
+          >
+            <Flag size={15} fill={isFlagged ? 'currentColor' : 'none'} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+            {isFlagged ? 'Flagged for Review' : 'Flag for Review'}
+          </button>
+          <select
+            className="pv-color-scheme-select"
+            value={colorScheme}
+            onChange={(e) => onColorSchemeChange(e.target.value)}
+            aria-label="Color Scheme"
+          >
+            <option value="" disabled>Color Scheme</option>
+            {COLOR_SCHEMES.map(s => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="pv-content">
+        <div className="pv-question-text">
+          {renderTextWithImages(currentQuestion.question_text, currentQuestion.question_images || [])}
+          {isMultiple && (
+            <span> (Select {correctAnswers.length === 2 ? 'TWO' : correctAnswers.length === 3 ? 'THREE' : correctAnswers.length}.)</span>
+          )}
+        </div>
+
+        {choices.length > 0 ? (
+          <div className="pv-choices-list">
+            {choices.map(({ key, value }) => (
+              <div
+                key={key}
+                className="pv-choice-item"
+                onClick={() => onChoiceClick(key)}
+              >
+                <input
+                  type={isMultiple ? 'checkbox' : 'radio'}
+                  className="pv-choice-input"
+                  checked={selectedAnswers.includes(key)}
+                  onChange={() => onChoiceClick(key)}
+                  name={`question-${currentQuestionIndex}`}
+                />
+                <span className="pv-choice-label">
+                  <span className="pv-choice-letter">{key}.</span>
+                  <span className="pv-choice-text">
+                    {renderTextWithImages(value, currentQuestion.answer_images || [])}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="pv-no-choices">
+            Image-based answer choices not available in the dataset.
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="pv-footer">
+        <div className="pv-footer-left">
+          {cameFromReview && onReturnToReview && (
+            <button className="pv-footer-btn" onClick={onReturnToReview}>
+              <ChevronLeft size={16} /> Return to Review
+            </button>
+          )}
+        </div>
+        <div className="pv-footer-right">
+          {currentQuestionIndex > 0 && (
+            <button className="pv-footer-btn" onClick={onPrev}>
+              <ChevronLeft size={16} /> Previous
+            </button>
+          )}
+          {currentQuestionIndex < totalQuestions - 1 ? (
+            <button className="pv-footer-btn" onClick={onNext}>
+              Next <ChevronRight size={16} />
+            </button>
+          ) : (
+            <button className="pv-footer-btn" onClick={onReview}>
+              Next <ChevronRight size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Comment Dialog */}
+      {showComment && (
+        <>
+          <div className="pv-modal-overlay" onClick={() => setShowComment(false)} />
+          <div className="pv-comment-dialog">
+            <div className="pv-comment-header">
+              <FileEdit size={15} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              Comment
+            </div>
+            <div className="pv-comment-body">
+              <textarea
+                className="pv-comment-textarea"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+            </div>
+            <div className="pv-comment-actions">
+              <button className="pv-modal-btn" onClick={() => setShowComment(false)}>Save</button>
+              <button className="pv-modal-btn" onClick={() => setShowComment(false)}>Cancel</button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

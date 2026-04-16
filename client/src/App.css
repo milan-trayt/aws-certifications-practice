@@ -100,8 +100,12 @@ body {
 }
 
 .user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   color: var(--color-text-secondary);
   font-size: 0.9rem;
+  flex-wrap: wrap;
 }
 
 /* Theme Toggle */

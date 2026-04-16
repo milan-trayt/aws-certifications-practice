@@ -31,8 +31,8 @@ const PORT = process.env.PORT || 5000;
 // Database connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false // For AWS RDS with self-signed certificates
+  ssl: process.env.DB_SSL === 'true' ? {
+    rejectUnauthorized: false
   } : false
 });
 
@@ -79,10 +79,10 @@ app.use(cors(corsOptions));
 
 const { RATE_LIMIT_GENERAL } = require('./utils/constants');
 
-const isDev = process.env.NODE_ENV !== 'production';
+const enableRateLimit = process.env.ENABLE_RATE_LIMIT === 'true';
 
-// Rate limiting — skip entirely in development
-if (!isDev) {
+// Rate limiting — toggled via ENABLE_RATE_LIMIT env var
+if (enableRateLimit) {
   const limiter = rateLimit({
     windowMs: RATE_LIMIT_GENERAL.windowMs,
     max: RATE_LIMIT_GENERAL.max,
@@ -95,10 +95,10 @@ if (!isDev) {
   app.use('/api/', limiter);
 }
 
-// Endpoint-specific rate limiters for public auth endpoints (production only)
+// Endpoint-specific rate limiters for public auth endpoints
 // Validates: Requirements 9.1, 9.2, 9.3, 9.4
 const { loginLimiter, registerLimiter, forgotPasswordLimiter } = require('./middleware/rateLimiters');
-if (!isDev) {
+if (enableRateLimit) {
   app.use('/api/auth/login', loginLimiter);
   app.use('/api/auth/register', registerLimiter);
   app.use('/api/auth/forgot-password', forgotPasswordLimiter);
